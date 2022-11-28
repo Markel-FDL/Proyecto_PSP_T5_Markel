@@ -1,4 +1,5 @@
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -16,7 +17,7 @@ public class Main {
 class Cliente {
     static Scanner scanner = new Scanner(System.in);
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
         Seleccion();
     }
 
@@ -152,10 +153,6 @@ class Cliente {
 
         Usuarios usuario = new Usuarios(nombre, apellido, edad, email, usuarioo, new String(resumen));
 
-        Usuarios usuarios = new Usuarios();
-
-        usuarios.escribir_usuario(usuario);
-
         enviar_objeto.writeObject(usuario);
 
         System.out.println("Usuario creado");
@@ -205,7 +202,21 @@ class Cliente {
 
         enviar_objeto.writeObject(usuario);
 
-        if ()
+        DataInputStream in = new DataInputStream(cliente.getInputStream());
+
+        String contrato = in.readUTF();
+        System.out.println(contrato);
+        System.out.println("\nAceptas el contrato? (s/n): ");
+        String contrat = scanner.nextLine();
+        if (Objects.equals(contrat, "s")){
+            // TODO: Se necesita firmado digital
+        } else if (contrat == "n" || contrat != "s") {
+            Seleccion();
+        }
+
+    }
+
+    public void Menu_banca(){
 
     }
 
@@ -214,37 +225,62 @@ class Cliente {
 }
 
 class Servidor{
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        ServerSocket servidor = new ServerSocket(5553);
 
-    }
 
-    public static void Comprobar_normas_banco(Socket cliente) throws IOException {
-
-        ObjectInputStream outDato = new ObjectInputStream(cliente.getInputStream());
-
-        String contrato = "Normas del banco.";
-
-        DataOutputStream enviar_norma = new DataOutputStream(cliente.getOutputStream());
-        DataInputStream recivir_norma = new DataInputStream(cliente.getInputStream());
-
-        enviar_norma.writeUTF(contrato);
-
-        String respuesta = recivir_norma.readUTF();
-
-        if (respuesta == "s") {
-
+        while (true) {
+            Socket scServidor = servidor.accept();
+            Hilo hilo = new Hilo(scServidor, servidor);
+            Thread t1 = new Thread(hilo);
+            t1.start();
         }
-
-
     }
+
+
 
 }
 
 
 class Hilo implements Runnable{
 
+    Socket s;
+    ServerSocket ss;
+
+    public Hilo(Socket s, ServerSocket ss) {
+        this.s = s;
+        this.ss = ss;
+    }
+
     @Override
     public void run() {
+
+    }
+
+    public void servidor() throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
+        ObjectInputStream inDatoObjeto = new ObjectInputStream(s.getInputStream());
+        DataInputStream inDato = new DataInputStream(s.getInputStream());
+
+        if (inDato.read() == 1){
+            Comprobar_inicio_sesion();
+            Comprobar_normas_banco();
+        } else if (inDato.read() == 2) {
+            Registro_servidor();
+            Cliente.Seleccion();
+        }
+
+    }
+
+    public void Registro_servidor() throws IOException, ClassNotFoundException {
+        ObjectInputStream inDato = new ObjectInputStream(s.getInputStream());
+
+        Usuarios usuario = (Usuarios) inDato.readObject();
+
+        Usuarios usuarios = new Usuarios();
+
+        usuarios.escribir_usuario(usuario);
+
+
 
     }
 
@@ -254,6 +290,24 @@ class Hilo implements Runnable{
         Usuarios usuario = (Usuarios) outDato.readObject();
 
 
+    }
+
+    public void Comprobar_normas_banco() throws IOException {
+
+        ObjectInputStream outDato = new ObjectInputStream(s.getInputStream());
+
+        String contrato = "Normas del banco.";
+
+        DataOutputStream enviar_norma = new DataOutputStream(s.getOutputStream());
+        DataInputStream recivir_norma = new DataInputStream(s.getInputStream());
+
+        enviar_norma.writeUTF(contrato);
+
+        String respuesta = recivir_norma.readUTF();
+
+        if (respuesta == "s") {
+
+        }
 
 
     }
