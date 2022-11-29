@@ -1,8 +1,7 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -36,7 +35,7 @@ class Cliente {
                 System.out.println("Selecciona una opción (9 salir): ");
                 num = scanner.nextInt();
                 scanner.nextLine();
-                if (num < 0 || num >= 3 || num != 9) {
+                if (num < 0 || num >= 3 && num != 9) {
                     System.out.println("Error al insertar dato");
                 }
             } while (num < 0 || num > 2);
@@ -45,10 +44,10 @@ class Cliente {
         }
 
         if (num == 1) {
-            enviar_dato.write(num);
+            enviar_dato.writeInt(num);
             Iniciar_sesion(cliente);
         } else if (num == 2) {
-            enviar_dato.write(num);
+            enviar_dato.writeInt(num);
             Registrarse(cliente);
         } else if (num == 9) {
             System.exit(0);
@@ -108,16 +107,18 @@ class Cliente {
 
         Pattern pat;
         Matcher mat;
+        boolean s = true;
         try {
             do {
                 System.out.println("\nIntroduce tu email: ");
                 email = scanner.nextLine();
-                pat = Pattern.compile("^(.+)@(.+)$");
+                pat = Pattern.compile("^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$");
                 mat = pat.matcher(email);
                 if (!mat.find()) {
                     System.out.println("email no valido");
+                    s = false;
                 }
-            } while (!mat.find());
+            } while (!s);
         } catch (Exception e) {
             System.out.println("Error");
         }
@@ -154,6 +155,7 @@ class Cliente {
         Usuarios usuario = new Usuarios(nombre, apellido, edad, email, usuarioo, new String(resumen));
 
         enviar_objeto.writeObject(usuario);
+
 
         System.out.println("Usuario creado");
 
@@ -203,23 +205,35 @@ class Cliente {
         enviar_objeto.writeObject(usuario);
 
         DataInputStream in = new DataInputStream(cliente.getInputStream());
+        DataOutputStream out = new DataOutputStream(cliente.getOutputStream());
 
         String contrato = in.readUTF();
         System.out.println(contrato);
         System.out.println("\nAceptas el contrato? (s/n): ");
         String contrat = scanner.nextLine();
-        if (Objects.equals(contrat, "s")){
-            // TODO: Se necesita firmado digital
+        if (Objects.equals(contrat, "s")) {
+            out.writeUTF(contrat);
         } else if (contrat == "n" || contrat != "s") {
+            Seleccion();
+
+        }
+
+        String resu = "FiRMA VERIFICADA CON CLAVE PÚBLICA.";
+        String resu2 = "FiRMA NO VERIFICADA";
+        String respuesta = in.readUTF();
+
+        if (respuesta.equals(resu)){
+            Menu_banca();
+        } else if (respuesta.equals(resu2)) {
+            System.out.printf("Firma fallida");
             Seleccion();
         }
 
     }
 
-    public void Menu_banca(){
+    public static void Menu_banca() {
 
     }
-
 
 
 }
@@ -254,6 +268,16 @@ class Hilo implements Runnable{
 
     @Override
     public void run() {
+        try {
+            servidor();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+
 
     }
 
@@ -261,12 +285,15 @@ class Hilo implements Runnable{
         ObjectInputStream inDatoObjeto = new ObjectInputStream(s.getInputStream());
         DataInputStream inDato = new DataInputStream(s.getInputStream());
 
-        if (inDato.read() == 1){
+        int i = inDato.readInt();
+        System.out.println("Dato");
+
+        if (i == 1){
             Comprobar_inicio_sesion();
             Comprobar_normas_banco();
-        } else if (inDato.read() == 2) {
+        } else if (i == 2) {
             Registro_servidor();
-            Cliente.Seleccion();
+            servidor();
         }
 
     }
@@ -280,6 +307,8 @@ class Hilo implements Runnable{
 
         usuarios.escribir_usuario(usuario);
 
+        System.out.println("Usuario creado");
+
 
 
     }
@@ -288,6 +317,19 @@ class Hilo implements Runnable{
         ObjectInputStream outDato = new ObjectInputStream(s.getInputStream());
 
         Usuarios usuario = (Usuarios) outDato.readObject();
+
+        try {
+            while (usuario != null){
+ /*               if (usuario.usuario ==  && usuario.contrasena == ){
+
+                }*/
+                usuario = (Usuarios) outDato.readObject();
+            }
+        } catch (IOException e) {
+            System.out.println("Ha ocurrido un error");
+        } catch (ClassNotFoundException e) {
+            System.out.println("Ha habido algun error con la clase");
+        }
 
 
     }
@@ -305,8 +347,53 @@ class Hilo implements Runnable{
 
         String respuesta = recivir_norma.readUTF();
 
-        if (respuesta == "s") {
+        if (respuesta.equals("s")) {
+            Firmado_digital();
+        }
 
+
+    }
+
+    public void Firmado_digital() throws IOException {
+        DataInputStream inData = new DataInputStream(s.getInputStream());
+        DataOutputStream outData = new DataOutputStream(s.getOutputStream());
+
+        try {
+            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
+//SE CREA EL PAR DE CLAVES PRIVADA Y PÚBLICA
+            KeyPair par = keyGen.generateKeyPair();
+            PrivateKey clavepriv = par.getPrivate();
+            PublicKey clavepub = par.getPublic();
+//FIRMA CON CLAVE PRIVADA EL MENSAJE
+//AL OBJETO Signature SE LE SUMINISTRAN LOS DATOS A FIRMAR
+            Signature dsa = Signature.getInstance("SHA1withDSA");
+            dsa.initSign(clavepriv);
+            String mensaje = "Contrato aceptado";
+            dsa.update(mensaje.getBytes());
+            byte[] firma = dsa.sign(); //MENSAJE FIRMADO
+//EL RECEPTOR DEL MENSAJE
+//VERIFICA CON LA CLAVE PUIBLICA EL MENSAJE FIRMADO
+//AL OBJETO signature sE LE suministralos datos a verificar
+            Signature verificadsa = Signature.getInstance("SHA1withDSA");
+            verificadsa.initVerify(clavepub);
+            verificadsa.update(mensaje.getBytes());
+            boolean check = verificadsa.verify(firma);
+            String resu = "FiRMA VERIFICADA CON CLAVE PÚBLICA.";
+            String resu2 = "FiRMA NO VERIFICADA";
+            if (check) {
+                System.out.println("FiRMA VERIFICADA CON CLAVE PÚBLICA.");
+                outData.writeUTF(resu);
+            } else {
+                System.out.println("FiRMA NO VERIFICADA");
+                outData.writeUTF(resu2);
+            }
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch (SignatureException e) {
+            throw new RuntimeException(e);
+        } catch (InvalidKeyException e) {
+            throw new RuntimeException(e);
         }
 
 
@@ -345,14 +432,11 @@ class Usuarios implements Serializable{
     }
 
     public void escribir_usuario(Usuarios usuario) throws IOException {
-        // ObjectOutputStream para poder escribir en el fichero binario de directores "Directores.dat". Si no existe, se crea automaticamente.
-        ObjectOutputStream escribir = new ObjectOutputStream(new FileOutputStream("Usuarios.txt"));
+        ObjectOutputStream escribir = new ObjectOutputStream(new FileOutputStream("Usuarios.dat"));
 
         escribir.writeObject(usuario);
 
-        escribir.writeObject(null);
         escribir.close();
-
 
     }
 
