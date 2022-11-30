@@ -23,7 +23,7 @@ class Cliente {
     public static void Seleccion() throws IOException, NoSuchAlgorithmException {
         int num = 0;
 
-        Socket cliente = new Socket("localhost", 5553);
+        Socket cliente = new Socket("localhost", 5556);
 
         DataOutputStream enviar_dato = new DataOutputStream(cliente.getOutputStream());
 
@@ -44,10 +44,10 @@ class Cliente {
         }
 
         if (num == 1) {
-            enviar_dato.writeInt(num);
+            enviar_dato.writeInt(1);
             Iniciar_sesion(cliente);
         } else if (num == 2) {
-            enviar_dato.writeInt(num);
+            enviar_dato.writeInt(2);
             Registrarse(cliente);
         } else if (num == 9) {
             System.exit(0);
@@ -167,7 +167,9 @@ class Cliente {
         String usuarioo = null;
         String contrasena;
 
+        System.out.println("Ha entrado en Inicio de sesión");
         ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
+        DataInputStream in = new DataInputStream(cliente.getInputStream());
 
         System.out.println("Inicio de sesión");
 
@@ -204,30 +206,49 @@ class Cliente {
 
         enviar_objeto.writeObject(usuario);
 
-        DataInputStream in = new DataInputStream(cliente.getInputStream());
-        DataOutputStream out = new DataOutputStream(cliente.getOutputStream());
+        String inicio = in.readUTF();
 
-        String contrato = in.readUTF();
-        System.out.println(contrato);
-        System.out.println("\nAceptas el contrato? (s/n): ");
-        String contrat = scanner.nextLine();
-        if (Objects.equals(contrat, "s")) {
-            out.writeUTF(contrat);
-        } else if (contrat == "n" || contrat != "s") {
+        if (!inicio.equals("s")){
+            System.out.println("No se ha podido iniciar sesión");
             Seleccion();
+        } else {
+            DataOutputStream out = new DataOutputStream(cliente.getOutputStream());
+            System.out.println("Te has conectado");
+
+
+            System.out.println("\nQuieres ver el contrato? (s/n) (es necesario para continuar): ");
+            String az = scanner.nextLine();
+            if (Objects.equals(az, "s")) {
+                out.writeUTF("s");
+                String contrato = in.readUTF();
+                System.out.println(contrato);
+                System.out.println("\nAceptas el contrato? (s/n): ");
+                String contrat = scanner.nextLine();
+                if (Objects.equals(contrat, "s")) {
+                    out.writeUTF(contrat);
+                } else if (contrat == "n" || contrat != "s") {
+                    Seleccion();
+
+                }
+
+                String resu = "FiRMA VERIFICADA CON CLAVE PÚBLICA.";
+                String resu2 = "FiRMA NO VERIFICADA";
+                String respuesta = in.readUTF();
+
+                if (respuesta.equals(resu)) {
+                    Menu_banca();
+                } else if (respuesta.equals(resu2)) {
+                    System.out.printf("Firma fallida");
+                    Seleccion();
+                }
+
+            } else {
+                System.out.println("Volviendo al menu");
+                Seleccion();
+            }
 
         }
 
-        String resu = "FiRMA VERIFICADA CON CLAVE PÚBLICA.";
-        String resu2 = "FiRMA NO VERIFICADA";
-        String respuesta = in.readUTF();
-
-        if (respuesta.equals(resu)){
-            Menu_banca();
-        } else if (respuesta.equals(resu2)) {
-            System.out.printf("Firma fallida");
-            Seleccion();
-        }
 
     }
 
@@ -238,226 +259,10 @@ class Cliente {
 
 }
 
-class Servidor{
-    public static void main(String[] args) throws IOException {
-        ServerSocket servidor = new ServerSocket(5553);
-
-
-        while (true) {
-            Socket scServidor = servidor.accept();
-            Hilo hilo = new Hilo(scServidor, servidor);
-            Thread t1 = new Thread(hilo);
-            t1.start();
-        }
-    }
 
 
 
-}
 
 
-class Hilo implements Runnable{
-
-    Socket s;
-    ServerSocket ss;
-
-    public Hilo(Socket s, ServerSocket ss) {
-        this.s = s;
-        this.ss = ss;
-    }
-
-    @Override
-    public void run() {
-        try {
-            servidor();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-
-
-    }
-
-    public void servidor() throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
-        ObjectInputStream inDatoObjeto = new ObjectInputStream(s.getInputStream());
-        DataInputStream inDato = new DataInputStream(s.getInputStream());
-
-        int i = inDato.readInt();
-        System.out.println("Dato");
-
-        if (i == 1){
-            Comprobar_inicio_sesion();
-            Comprobar_normas_banco();
-        } else if (i == 2) {
-            Registro_servidor();
-            servidor();
-        }
-
-    }
-
-    public void Registro_servidor() throws IOException, ClassNotFoundException {
-        ObjectInputStream inDato = new ObjectInputStream(s.getInputStream());
-
-        Usuarios usuario = (Usuarios) inDato.readObject();
-
-        Usuarios usuarios = new Usuarios();
-
-        usuarios.escribir_usuario(usuario);
-
-        System.out.println("Usuario creado");
-
-
-
-    }
-
-    public void Comprobar_inicio_sesion() throws IOException, ClassNotFoundException {
-        ObjectInputStream outDato = new ObjectInputStream(s.getInputStream());
-
-        Usuarios usuario = (Usuarios) outDato.readObject();
-
-        try {
-            while (usuario != null){
- /*               if (usuario.usuario ==  && usuario.contrasena == ){
-
-                }*/
-                usuario = (Usuarios) outDato.readObject();
-            }
-        } catch (IOException e) {
-            System.out.println("Ha ocurrido un error");
-        } catch (ClassNotFoundException e) {
-            System.out.println("Ha habido algun error con la clase");
-        }
-
-
-    }
-
-    public void Comprobar_normas_banco() throws IOException {
-
-        ObjectInputStream outDato = new ObjectInputStream(s.getInputStream());
-
-        String contrato = "Normas del banco.";
-
-        DataOutputStream enviar_norma = new DataOutputStream(s.getOutputStream());
-        DataInputStream recivir_norma = new DataInputStream(s.getInputStream());
-
-        enviar_norma.writeUTF(contrato);
-
-        String respuesta = recivir_norma.readUTF();
-
-        if (respuesta.equals("s")) {
-            Firmado_digital();
-        }
-
-
-    }
-
-    public void Firmado_digital() throws IOException {
-        DataInputStream inData = new DataInputStream(s.getInputStream());
-        DataOutputStream outData = new DataOutputStream(s.getOutputStream());
-
-        try {
-            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
-//SE CREA EL PAR DE CLAVES PRIVADA Y PÚBLICA
-            KeyPair par = keyGen.generateKeyPair();
-            PrivateKey clavepriv = par.getPrivate();
-            PublicKey clavepub = par.getPublic();
-//FIRMA CON CLAVE PRIVADA EL MENSAJE
-//AL OBJETO Signature SE LE SUMINISTRAN LOS DATOS A FIRMAR
-            Signature dsa = Signature.getInstance("SHA1withDSA");
-            dsa.initSign(clavepriv);
-            String mensaje = "Contrato aceptado";
-            dsa.update(mensaje.getBytes());
-            byte[] firma = dsa.sign(); //MENSAJE FIRMADO
-//EL RECEPTOR DEL MENSAJE
-//VERIFICA CON LA CLAVE PUIBLICA EL MENSAJE FIRMADO
-//AL OBJETO signature sE LE suministralos datos a verificar
-            Signature verificadsa = Signature.getInstance("SHA1withDSA");
-            verificadsa.initVerify(clavepub);
-            verificadsa.update(mensaje.getBytes());
-            boolean check = verificadsa.verify(firma);
-            String resu = "FiRMA VERIFICADA CON CLAVE PÚBLICA.";
-            String resu2 = "FiRMA NO VERIFICADA";
-            if (check) {
-                System.out.println("FiRMA VERIFICADA CON CLAVE PÚBLICA.");
-                outData.writeUTF(resu);
-            } else {
-                System.out.println("FiRMA NO VERIFICADA");
-                outData.writeUTF(resu2);
-            }
-
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        } catch (SignatureException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
-        }
-
-
-    }
-
-}
-
-class Usuarios implements Serializable{
-
-    String nombre;
-    String apellido;
-    int edad;
-    String email;
-    String usuario;
-    String contrasena;
-
-    public Usuarios(String nombre, String apellido, int edad, String email, String usuario, String contrasena){
-        this.nombre = nombre;
-        this.apellido = apellido;
-        this.edad = edad;
-        this.email = email;
-        this.usuario = usuario;
-        this.contrasena = contrasena;
-    }
-    public Usuarios(){
-
-    }
-    
-    public Usuarios(String usuario, String contrasena){
-        this.usuario = usuario;
-        this.contrasena = contrasena;
-    }
-
-    public void Mostrar(){
-        System.out.println("Nombre: " + nombre + " \nApellido: " + apellido + "\nEdad: " + edad + "\nEmail: " + email + "\nUsuario: " + usuario + "\ncontrasena: " + contrasena);
-    }
-
-    public void escribir_usuario(Usuarios usuario) throws IOException {
-        ObjectOutputStream escribir = new ObjectOutputStream(new FileOutputStream("Usuarios.dat"));
-
-        escribir.writeObject(usuario);
-
-        escribir.close();
-
-    }
-
-    public void leer_usuario() throws IOException, ClassNotFoundException {
-
-        // ObjectInputStream para mostrar por pantalla los directores
-        ObjectInputStream mostrar = new ObjectInputStream(new FileInputStream("Usuarios.dat"));
-        Usuarios usuario = (Usuarios) mostrar.readObject();
-        // Mostramos por pantalla todos los directores
-        try {
-            while (usuario != null){
-                usuario.Mostrar();
-                usuario = (Usuarios) mostrar.readObject();
-            }
-        } catch (IOException e) {
-            System.out.println("Ha ocurrido un error");
-        } catch (ClassNotFoundException e) {
-            System.out.println("Ha habido algun error con la clase");
-        }
-    }
-
-}
 
 
