@@ -55,6 +55,8 @@ public class Hilos implements Runnable{
 
             usuarios.escribir_usuario(usuario);
 
+            usuarios.escribir_cuentas_bancarias(usuario);
+
             System.out.println("Usuario creado");
 
 
@@ -73,7 +75,7 @@ public class Hilos implements Runnable{
             Usuarios usuarios = (Usuarios) mostrar.readObject();
 
             try {
-                while (true){
+                while (usuarios != null){
                     if (Objects.equals(usuarios.usuario, usuario.usuario) && Objects.equals(usuarios.contrasena, usuario.contrasena)) {
                         String a = "s";
                         enviar_dato.writeUTF("s");
@@ -92,7 +94,7 @@ public class Hilos implements Runnable{
                         es++;
                         break;
                     }
-                    usuario = (Usuarios) mostrar.readObject();
+                    usuarios = (Usuarios) mostrar.readObject();
                 }
             } catch (IOException e) {
                 System.out.println("Ha ocurrido un error");
@@ -129,7 +131,7 @@ public class Hilos implements Runnable{
                 PublicKey clavepub = par.getPublic();
 //FIRMA CON CLAVE PRIVADA EL MENSAJE
 //AL OBJETO Signature SE LE SUMINISTRAN LOS DATOS A FIRMAR
-                Signature dsa = Signature.getInstance("SHA1withDSA");
+                Signature dsa = Signature.getInstance("SHA256withDSA");
                 dsa.initSign(clavepriv);
                 String mensaje = "Contrato aceptado";
                 dsa.update(mensaje.getBytes());
@@ -137,18 +139,18 @@ public class Hilos implements Runnable{
 //EL RECEPTOR DEL MENSAJE
 //VERIFICA CON LA CLAVE PUIBLICA EL MENSAJE FIRMADO
 //AL OBJETO signature sE LE suministralos datos a verificar
-                Signature verificadsa = Signature.getInstance("SHA1withDSA");
+                Signature verificadsa = Signature.getInstance("SHA256withDSA");
                 verificadsa.initVerify(clavepub);
                 verificadsa.update(mensaje.getBytes());
                 boolean check = verificadsa.verify(firma);
-                String resu = "FiRMA VERIFICADA CON CLAVE PÚBLICA.";
-                String resu2 = "FiRMA NO VERIFICADA";
                 if (check) {
                     System.out.println("FiRMA VERIFICADA CON CLAVE PÚBLICA.");
-                    outData.writeUTF(resu);
+                    outData.writeUTF("FiRMA VERIFICADA CON CLAVE PÚBLICA.");
+                    Banca_online();
                 } else {
                     System.out.println("FiRMA NO VERIFICADA");
-                    outData.writeUTF(resu2);
+                    outData.writeUTF("FiRMA NO VERIFICADA");
+                    servidor();
                 }
 
             } catch (NoSuchAlgorithmException e) {
@@ -157,8 +159,14 @@ public class Hilos implements Runnable{
                 throw new RuntimeException(e);
             } catch (InvalidKeyException e) {
                 throw new RuntimeException(e);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
             }
 
 
+        }
+
+        public void Banca_online(){
+            System.out.println("Banca online dentro");
         }
 }

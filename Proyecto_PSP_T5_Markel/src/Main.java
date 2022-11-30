@@ -112,7 +112,7 @@ class Cliente {
             do {
                 System.out.println("\nIntroduce tu email: ");
                 email = scanner.nextLine();
-                pat = Pattern.compile("^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$");
+                pat = Pattern.compile("^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+.[a-zA-Z0-9.-]$");
                 mat = pat.matcher(email);
                 if (!mat.find()) {
                     System.out.println("email no valido");
@@ -225,7 +225,7 @@ class Cliente {
                 System.out.println("\nAceptas el contrato? (s/n): ");
                 String contrat = scanner.nextLine();
                 if (Objects.equals(contrat, "s")) {
-                    out.writeUTF(contrat);
+                    out.writeUTF("s");
                 } else if (contrat == "n" || contrat != "s") {
                     Seleccion();
 
@@ -253,6 +253,14 @@ class Cliente {
     }
 
     public static void Menu_banca() {
+        int opcion;
+
+        System.out.println("Menu banca dentro");
+        System.out.println("\n1. Ver saldo de una cuenta bancaria");
+        System.out.println("2. Transferencia de dinero");
+        System.out.println("Selecciona una opcion: ");
+        opcion = scanner.nextInt();
+
 
     }
 
