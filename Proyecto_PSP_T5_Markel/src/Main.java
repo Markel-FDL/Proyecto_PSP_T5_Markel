@@ -3,6 +3,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.*;
 import java.util.Objects;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -152,12 +153,18 @@ class Cliente {
             System.out.println("Error");
         }
 
+        Random random = new Random();
+        int cuenta_ban = random.nextInt(0, 500);
+        int dinero = 500;
+
         Usuarios usuario = new Usuarios(nombre, apellido, edad, email, usuarioo, new String(resumen));
+        Cuentas_bancarias cuenta = new Cuentas_bancarias(usuario, cuenta_ban, dinero);
 
         enviar_objeto.writeObject(usuario);
+        enviar_objeto.writeObject(cuenta);
 
 
-        System.out.println("Usuario creado");
+        System.out.println("Usuario y cuenta creado");
 
         Seleccion();
 
@@ -236,9 +243,9 @@ class Cliente {
                 String respuesta = in.readUTF();
 
                 if (respuesta.equals(resu)) {
-                    Menu_banca();
+                    Menu_banca(cliente);
                 } else if (respuesta.equals(resu2)) {
-                    System.out.printf("Firma fallida");
+                    System.out.println("Firma fallida");
                     Seleccion();
                 }
 
@@ -252,16 +259,63 @@ class Cliente {
 
     }
 
-    public static void Menu_banca() {
+    public static void Menu_banca(Socket cliente) throws IOException {
+        ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
+        DataInputStream in = new DataInputStream(cliente.getInputStream());
+        DataOutputStream out = new DataOutputStream(cliente.getOutputStream());
+
+
         int opcion;
 
-        System.out.println("Menu banca dentro");
-        System.out.println("\n1. Ver saldo de una cuenta bancaria");
-        System.out.println("2. Transferencia de dinero");
-        System.out.println("Selecciona una opcion: ");
-        opcion = scanner.nextInt();
+        try {
+            do {
+                System.out.println("Menu banca dentro");
+                System.out.println("\n1. Ver saldo de una cuenta bancaria");
+                System.out.println("2. Transferencia de dinero");
+                System.out.println("Selecciona una opcion: ");
+                opcion = scanner.nextInt();
+                scanner.nextLine();
+                if (opcion < 0 || opcion >= 3 && opcion != 9) {
+                    System.out.println("Error al insertar dato");
+                }
+            }while (opcion < 0 || opcion >= 3 && opcion != 9);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
+        if (opcion == 1) {
+            out.writeInt(1);
+            Ver_saldo(cliente);
+        } else if (opcion == 2) {
+            out.writeInt(2);
 
+        } else if (opcion == 9) {
+            System.exit(0);
+        }
+
+    }
+
+    public static void Ver_saldo(Socket cliente) throws IOException {
+        ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
+        DataInputStream in = new DataInputStream(cliente.getInputStream());
+        DataOutputStream out = new DataOutputStream(cliente.getOutputStream());
+        int sec_cuenta;
+
+        int zz = in.readInt();
+
+        System.out.println(zz);
+
+        System.out.println("Inserta el numero de la cuenta: ");
+        sec_cuenta = scanner.nextInt();
+        scanner.nextLine();
+
+        out.writeInt(sec_cuenta);
+
+        int dinero = in.readInt();
+
+        System.out.println("Dinero den la cuenta: " + dinero);
+
+        Menu_banca(cliente);
     }
 
 

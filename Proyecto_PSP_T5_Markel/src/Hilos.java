@@ -50,12 +50,14 @@ public class Hilos implements Runnable{
             ObjectInputStream inDato = new ObjectInputStream(s.getInputStream());
 
             Usuarios usuario = (Usuarios) inDato.readObject();
+            Cuentas_bancarias cuenta = (Cuentas_bancarias) inDato.readObject();
 
             Usuarios usuarios = new Usuarios();
+            Cuentas_bancarias cuentas = new Cuentas_bancarias();
 
             usuarios.escribir_usuario(usuario);
 
-            usuarios.escribir_cuentas_bancarias(usuario);
+            cuentas.escribir_cuentas_bancarias(cuenta);
 
             System.out.println("Usuario creado");
 
@@ -166,7 +168,72 @@ public class Hilos implements Runnable{
 
         }
 
-        public void Banca_online(){
+        public void Banca_online() throws IOException, NoSuchAlgorithmException, ClassNotFoundException {
+            DataInputStream inData = new DataInputStream(s.getInputStream());
+            DataOutputStream outData = new DataOutputStream(s.getOutputStream());
+
             System.out.println("Banca online dentro");
+            int i = inData.readInt();
+            System.out.println("Dato2");
+
+            if (i == 1){
+                Mostrar_cuentas();
+
+            } else if (i == 2) {
+                Registro_servidor();
+                servidor();
+            }
         }
+
+    public void Mostrar_cuentas() throws IOException, ClassNotFoundException {
+        DataOutputStream outData = new DataOutputStream(s.getOutputStream());
+        ObjectInputStream mostrar = new ObjectInputStream(new FileInputStream("Cuentas.dat"));
+        Cuentas_bancarias usuario1 = (Cuentas_bancarias) mostrar.readObject();
+
+        try {
+            while (usuario1 != null) {
+                System.out.println("Cuenta bancaria: " + usuario1.usuario);
+                outData.writeInt(usuario1.cuenta_bancaria);
+                usuario1 = (Cuentas_bancarias) mostrar.readObject();
+            }
+        } catch (IOException e) {
+            System.out.println("Ha ocurrido un error");
+        } catch (ClassNotFoundException e) {
+            System.out.println("Ha habido algun error con la clase");
+        }
+        mostrar.close();
+        Cuenta_Mostrar();
+
+    }
+
+    public void Cuenta_Mostrar() throws IOException, ClassNotFoundException {
+        DataInputStream inData = new DataInputStream(s.getInputStream());
+        DataOutputStream outData = new DataOutputStream(s.getOutputStream());
+        ObjectInputStream mostrar = new ObjectInputStream(new FileInputStream("Cuentas.dat"));
+
+        int cuenta = inData.readInt();
+
+        Cuentas_bancarias usuario1 = (Cuentas_bancarias) mostrar.readObject();
+
+        try {
+            while (usuario1 != null) {
+                if (cuenta == usuario1.cuenta_bancaria){
+                    System.out.println("Saldo de la cuenta:" + usuario1.dinero);
+                    outData.writeInt(usuario1.dinero);
+                    usuario1 = (Cuentas_bancarias) mostrar.readObject();
+                } else {
+                    usuario1 = (Cuentas_bancarias) mostrar.readObject();
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Ha ocurrido un error");
+        } catch (ClassNotFoundException e) {
+            System.out.println("Ha habido algun error con la clase");
+        }
+        mostrar.close();
+
+
+
+
+    }
 }
