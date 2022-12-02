@@ -26,7 +26,10 @@ class Cliente {
 
         Socket cliente = new Socket("localhost", 5556);
 
+       // ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
+       // ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
         DataOutputStream enviar_dato = new DataOutputStream(cliente.getOutputStream());
+       // DataInputStream recibir_dato = new DataInputStream(cliente.getInputStream());
 
         try {
             do {
@@ -66,6 +69,9 @@ class Cliente {
         String contrasena;
 
         ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
+       // ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
+       // DataOutputStream enviar_dato = new DataOutputStream(cliente.getOutputStream());
+       // DataInputStream recibir_dato = new DataInputStream(cliente.getInputStream());
 
         System.out.println("Menu de registro");
 
@@ -176,7 +182,9 @@ class Cliente {
 
         System.out.println("Ha entrado en Inicio de sesión");
         ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
-        DataInputStream in = new DataInputStream(cliente.getInputStream());
+       // ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
+       // DataOutputStream enviar_dato = new DataOutputStream(cliente.getOutputStream());
+        DataInputStream recibir_dato = new DataInputStream(cliente.getInputStream());
 
         System.out.println("Inicio de sesión");
 
@@ -213,7 +221,7 @@ class Cliente {
 
         enviar_objeto.writeObject(usuario);
 
-        String inicio = in.readUTF();
+        String inicio = recibir_dato.readUTF();
 
         if (!inicio.equals("s")){
             System.out.println("No se ha podido iniciar sesión");
@@ -227,7 +235,7 @@ class Cliente {
             String az = scanner.nextLine();
             if (Objects.equals(az, "s")) {
                 out.writeUTF("s");
-                String contrato = in.readUTF();
+                String contrato = recibir_dato.readUTF();
                 System.out.println(contrato);
                 System.out.println("\nAceptas el contrato? (s/n): ");
                 String contrat = scanner.nextLine();
@@ -240,7 +248,7 @@ class Cliente {
 
                 String resu = "FiRMA VERIFICADA CON CLAVE PÚBLICA.";
                 String resu2 = "FiRMA NO VERIFICADA";
-                String respuesta = in.readUTF();
+                String respuesta = recibir_dato.readUTF();
 
                 if (respuesta.equals(resu)) {
                     Menu_banca(cliente);
@@ -260,12 +268,13 @@ class Cliente {
     }
 
     public static void Menu_banca(Socket cliente) throws IOException {
-        ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
-        DataInputStream in = new DataInputStream(cliente.getInputStream());
-        DataOutputStream out = new DataOutputStream(cliente.getOutputStream());
+      //  ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
+      //  ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
+        DataOutputStream enviar_dato = new DataOutputStream(cliente.getOutputStream());
+      //  DataInputStream recibir_dato = new DataInputStream(cliente.getInputStream());
 
 
-        int opcion;
+        int opcion = 0;
 
         try {
             do {
@@ -284,10 +293,12 @@ class Cliente {
         }
 
         if (opcion == 1) {
-            out.writeInt(1);
+            enviar_dato.writeInt(1);
+            opcion = 0;
             Ver_saldo(cliente);
         } else if (opcion == 2) {
-            out.writeInt(2);
+            enviar_dato.writeInt(2);
+            opcion = 0;
 
         } else if (opcion == 9) {
             System.exit(0);
@@ -296,12 +307,14 @@ class Cliente {
     }
 
     public static void Ver_saldo(Socket cliente) throws IOException {
-        ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
-        DataInputStream in = new DataInputStream(cliente.getInputStream());
-        DataOutputStream out = new DataOutputStream(cliente.getOutputStream());
+       // ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
+       // ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
+        DataOutputStream enviar_dato = new DataOutputStream(cliente.getOutputStream());
+        DataInputStream recibir_dato = new DataInputStream(cliente.getInputStream());
+
         int sec_cuenta;
 
-        int zz = in.readInt();
+        int zz = recibir_dato.readInt();
 
         System.out.println(zz);
 
@@ -309,11 +322,11 @@ class Cliente {
         sec_cuenta = scanner.nextInt();
         scanner.nextLine();
 
-        out.writeInt(sec_cuenta);
+        enviar_dato.writeInt(sec_cuenta);
 
-        int dinero = in.readInt();
+        int dinero = recibir_dato.readInt();
 
-        System.out.println("Dinero den la cuenta: " + dinero);
+        System.out.println("Dinero en la cuenta: " + dinero);
 
         Menu_banca(cliente);
     }

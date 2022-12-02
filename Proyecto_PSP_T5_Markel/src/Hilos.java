@@ -185,7 +185,7 @@ public class Hilos implements Runnable{
             }
         }
 
-    public void Mostrar_cuentas() throws IOException, ClassNotFoundException {
+    public void Mostrar_cuentas() throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
         DataOutputStream outData = new DataOutputStream(s.getOutputStream());
         ObjectInputStream mostrar = new ObjectInputStream(new FileInputStream("Cuentas.dat"));
         Cuentas_bancarias usuario1 = (Cuentas_bancarias) mostrar.readObject();
@@ -206,7 +206,7 @@ public class Hilos implements Runnable{
 
     }
 
-    public void Cuenta_Mostrar() throws IOException, ClassNotFoundException {
+    public void Cuenta_Mostrar() throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
         DataInputStream inData = new DataInputStream(s.getInputStream());
         DataOutputStream outData = new DataOutputStream(s.getOutputStream());
         ObjectInputStream mostrar = new ObjectInputStream(new FileInputStream("Cuentas.dat"));
@@ -232,6 +232,7 @@ public class Hilos implements Runnable{
         }
         mostrar.close();
 
+        Banca_online();
 
 
 
