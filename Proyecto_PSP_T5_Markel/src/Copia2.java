@@ -329,4 +329,34 @@ public class Copia2 {
             return new String(mensajeRecibidoDescifrado);
         }
     }
+
+  /*  public void Mostrar_cuenta_usuario(Usuarios usuarios, int i) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
+        DataOutputStream outData = new DataOutputStream(s.getOutputStream());
+        ObjectInputStream mostrar = new ObjectInputStream(new FileInputStream("Cuentas.dat"));
+        Cuentas_bancarias usuario1 = (Cuentas_bancarias) mostrar.readObject();
+
+        try {
+            while (usuario1 != null) {
+                if (usuario1.usuario.usuario.equals(usuarios.usuario)){
+                    System.out.println("Cuenta bancaria: " + usuario1.usuario);
+                    outData.writeUTF(usuario1.cuenta_bancaria);
+                    usuario1 = (Cuentas_bancarias) mostrar.readObject();
+                } else {
+                    usuario1 = (Cuentas_bancarias) mostrar.readObject();
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Ha ocurrido un error");
+        } catch (ClassNotFoundException e) {
+            System.out.println("Ha habido algun error con la clase");
+        }
+        mostrar.close();
+        int c;
+        if (i == 1){
+            Cuenta_Mostrar(usuarios);
+        } else if (i == 2) {
+            Transferir_dinero();
+        }
+
+    }*/
 }

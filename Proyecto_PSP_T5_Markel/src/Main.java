@@ -375,6 +375,28 @@ class Cliente {
         }
     }
 
+    public void Transferencia_dinero(Socket cliente) throws IOException {
+        // ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
+        // ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
+        DataOutputStream enviar_dato = new DataOutputStream(cliente.getOutputStream());
+        DataInputStream recibir_dato = new DataInputStream(cliente.getInputStream());
+
+        String sec_cuenta;
+
+        String zz = recibir_dato.readUTF();
+
+        System.out.println("Tu cuenta: " + zz);
+
+        System.out.println("Inserta el numero de la cuenta a donde enviar el dinero: ");
+        sec_cuenta = scanner.nextLine();
+
+
+
+
+        enviar_dato.writeUTF(sec_cuenta);
+
+    }
+
 }
 
 

@@ -92,7 +92,7 @@ public class Hilos implements Runnable{
                         String respuesta = recivir_norma.readUTF();
 
                         if (respuesta.equals("s")) {
-                            Firmado_digital();
+                            Firmado_digital(usuario);
                         }
                         es++;
                         break;
@@ -122,7 +122,7 @@ public class Hilos implements Runnable{
 
         }
 
-        public void Firmado_digital() throws IOException {
+        public void Firmado_digital(Usuarios usuarios) throws IOException {
             DataInputStream inData = new DataInputStream(s.getInputStream());
             DataOutputStream outData = new DataOutputStream(s.getOutputStream());
 
@@ -149,7 +149,7 @@ public class Hilos implements Runnable{
                 if (check) {
                     System.out.println("FiRMA VERIFICADA CON CLAVE PÚBLICA.");
                     outData.writeUTF("FiRMA VERIFICADA CON CLAVE PÚBLICA.");
-                    Banca_online();
+                    Banca_online(usuarios);
                 } else {
                     System.out.println("FiRMA NO VERIFICADA");
                     outData.writeUTF("FiRMA NO VERIFICADA");
@@ -169,7 +169,7 @@ public class Hilos implements Runnable{
 
         }
 
-        public void Banca_online() throws IOException, NoSuchAlgorithmException, ClassNotFoundException {
+        public void Banca_online(Usuarios usuarios) throws IOException, NoSuchAlgorithmException, ClassNotFoundException {
             DataInputStream inData = new DataInputStream(s.getInputStream());
             DataOutputStream outData = new DataOutputStream(s.getOutputStream());
 
@@ -178,10 +178,11 @@ public class Hilos implements Runnable{
             System.out.println("Dato2");
 
             if (i == 1){
-                Mostrar_cuentas();
+                Mostrar_cuenta_usuario(usuarios, i);
 
             } else if (i == 2) {
-                Registro_servidor();
+                Mostrar_cuenta_usuario(usuarios, i);
+                Mostrar_cuentas();
                 servidor();
             }
         }
@@ -193,9 +194,34 @@ public class Hilos implements Runnable{
 
         try {
             while (usuario1 != null) {
-                System.out.println("Cuenta bancaria: " + usuario1.usuario);
-                outData.writeUTF(usuario1.cuenta_bancaria);
-                usuario1 = (Cuentas_bancarias) mostrar.readObject();
+                    System.out.println("Cuenta bancaria: " + usuario1.usuario);
+                    outData.writeUTF(usuario1.cuenta_bancaria);
+                    usuario1 = (Cuentas_bancarias) mostrar.readObject();
+                }
+        } catch (IOException e) {
+            System.out.println("Ha ocurrido un error");
+        } catch (ClassNotFoundException e) {
+            System.out.println("Ha habido algun error con la clase");
+        }
+        mostrar.close();
+
+
+    }
+
+    public void Mostrar_cuenta_usuario(Usuarios usuarios, int i) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
+        DataOutputStream outData = new DataOutputStream(s.getOutputStream());
+        ObjectInputStream mostrar = new ObjectInputStream(new FileInputStream("Cuentas.dat"));
+        Cuentas_bancarias usuario1 = (Cuentas_bancarias) mostrar.readObject();
+
+        try {
+            while (usuario1 != null) {
+                if (usuario1.usuario.usuario.equals(usuarios.usuario)){
+                    System.out.println("Cuenta bancaria: " + usuario1.usuario);
+                    outData.writeUTF(usuario1.cuenta_bancaria);
+                    usuario1 = (Cuentas_bancarias) mostrar.readObject();
+                } else {
+                    usuario1 = (Cuentas_bancarias) mostrar.readObject();
+                }
             }
         } catch (IOException e) {
             System.out.println("Ha ocurrido un error");
@@ -203,11 +229,26 @@ public class Hilos implements Runnable{
             System.out.println("Ha habido algun error con la clase");
         }
         mostrar.close();
-        Cuenta_Mostrar();
+
+        if (i == 1){
+            Cuenta_Mostrar(usuarios);
+        } else if (i == 2) {
+            Mostrar_cuentas();
+        }
 
     }
 
-    public void Cuenta_Mostrar() throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
+    public void Transferir_dinero() throws IOException {
+        DataOutputStream outData = new DataOutputStream(s.getOutputStream());
+        DataInputStream inData = new DataInputStream(s.getInputStream());
+
+        String cuenta;
+
+        cuenta = inData.readUTF();
+
+    }
+
+    public void Cuenta_Mostrar(Usuarios usuarios) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
         DataInputStream inData = new DataInputStream(s.getInputStream());
         DataOutputStream outData = new DataOutputStream(s.getOutputStream());
         ObjectInputStream mostrar = new ObjectInputStream(new FileInputStream("Cuentas.dat"));
@@ -239,7 +280,7 @@ public class Hilos implements Runnable{
 
         mostrar.close();
 
-        Banca_online();
+        Banca_online(usuarios);
 
     }
 
