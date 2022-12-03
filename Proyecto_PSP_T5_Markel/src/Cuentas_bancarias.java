@@ -5,11 +5,11 @@ import java.util.List;
 public class Cuentas_bancarias implements Serializable{
 
     Usuarios usuario;
-    int cuenta_bancaria;
+    String cuenta_bancaria;
 
     int dinero;
 
-    public Cuentas_bancarias(Usuarios usuario, int cuenta_bancaria, int dinero){
+    public Cuentas_bancarias(Usuarios usuario, String cuenta_bancaria, int dinero){
         this.usuario = usuario;
         this.cuenta_bancaria = cuenta_bancaria;
         this.dinero = dinero;

@@ -1,3 +1,4 @@
+import javax.crypto.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -193,7 +194,7 @@ public class Hilos implements Runnable{
         try {
             while (usuario1 != null) {
                 System.out.println("Cuenta bancaria: " + usuario1.usuario);
-                outData.writeInt(usuario1.cuenta_bancaria);
+                outData.writeUTF(usuario1.cuenta_bancaria);
                 usuario1 = (Cuentas_bancarias) mostrar.readObject();
             }
         } catch (IOException e) {
@@ -211,30 +212,112 @@ public class Hilos implements Runnable{
         DataOutputStream outData = new DataOutputStream(s.getOutputStream());
         ObjectInputStream mostrar = new ObjectInputStream(new FileInputStream("Cuentas.dat"));
 
-        int cuenta = inData.readInt();
+        String mensaje = Cifrado_simentrico();
 
         Cuentas_bancarias usuario1 = (Cuentas_bancarias) mostrar.readObject();
-
+        int i = 0;
         try {
             while (usuario1 != null) {
-                if (cuenta == usuario1.cuenta_bancaria){
+                if (mensaje.equals(usuario1.cuenta_bancaria)){
                     System.out.println("Saldo de la cuenta:" + usuario1.dinero);
                     outData.writeInt(usuario1.dinero);
+                    i++;
                     usuario1 = (Cuentas_bancarias) mostrar.readObject();
                 } else {
                     usuario1 = (Cuentas_bancarias) mostrar.readObject();
                 }
+            }
+            if (i == 0){
+                System.out.println("La cuenta bancaria no existe");
+                outData.writeInt(-1);
             }
         } catch (IOException e) {
             System.out.println("Ha ocurrido un error");
         } catch (ClassNotFoundException e) {
             System.out.println("Ha habido algun error con la clase");
         }
+
         mostrar.close();
 
         Banca_online();
 
+    }
+
+    public String Cifrado_simentrico() {
+        String mensajeRecibidoDescifrado = "";
+        try {
+
+            byte[] mensajeRecibido = null;
+
+            KeyGenerator keygen = null;
+            Cipher desCipher = null;
 
 
+            System.out.println("Obteniendo generador de claves con cifrado DES");
+            try {
+                keygen = KeyGenerator.getInstance("DES");
+            } catch (NoSuchAlgorithmException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            System.out.println("Generando clave");
+            SecretKey key = keygen.generateKey();
+            // //////////////////////////////////////////////////////////////
+            // CONVERTIR CLAVE A STRING Y VISUALIZAR/////////////////////////
+            // obteniendo la version codificada en base 64 de la clave
+
+            System.out.println("La clave es: " + key);
+
+            // //////////////////////////////////////////////////////////////
+            // CREAR CIFRADOR Y PONER EN MODO DESCIFRADO//////////////////
+            System.out.println("Obteniendo objeto Cipher con cifraddo DES");
+            try {
+                desCipher = Cipher.getInstance("DES");
+            } catch (NoSuchAlgorithmException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (NoSuchPaddingException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            System.out.println("Configurando Cipher para desencriptar");
+            try {
+                desCipher.init(Cipher.DECRYPT_MODE, key);
+            } catch (InvalidKeyException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+            // Enviamos la clave
+            ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+            ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
+            oos.writeObject(key);
+
+
+            mensajeRecibido = (byte[]) ois.readObject();
+
+            mensajeRecibidoDescifrado = new String(desCipher.doFinal(mensajeRecibido));
+            System.out.println("El texto enviado por el cliente y descifrado por el servidor es : " + new String(mensajeRecibidoDescifrado));
+
+
+
+            // cierra los paquetes de datos, el socket y el servidor
+            //ois.close();
+            //oos.close();
+
+            System.out.println("Fin de la conexion");
+
+
+
+        } catch (IOException ex) {
+            // Logger.getLogger(hilo.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalBlockSizeException e) {
+            throw new RuntimeException(e);
+        } catch (BadPaddingException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return new String(mensajeRecibidoDescifrado);
     }
 }
