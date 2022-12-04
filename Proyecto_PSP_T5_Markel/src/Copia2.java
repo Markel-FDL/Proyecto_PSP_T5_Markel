@@ -2,11 +2,12 @@ import javax.crypto.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.security.*;
 import java.util.Objects;
-
-public class Copia2 {
-    public class Hilos implements Runnable{
+import java.util.Random;
+class ff {
+    public class Hilos implements Runnable {
 
         Socket s;
         ServerSocket ss;
@@ -39,7 +40,7 @@ public class Copia2 {
             int i = inDato.readInt();
             System.out.println("Dato2");
 
-            if (i == 1){
+            if (i == 1) {
                 Comprobar_inicio_sesion();
             } else if (i == 2) {
                 Registro_servidor();
@@ -64,7 +65,6 @@ public class Copia2 {
             System.out.println("Usuario creado");
 
 
-
         }
 
         public void Comprobar_inicio_sesion() throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
@@ -79,7 +79,7 @@ public class Copia2 {
             Usuarios usuarios = (Usuarios) mostrar.readObject();
 
             try {
-                while (usuarios != null){
+                while (usuarios != null) {
                     if (Objects.equals(usuarios.usuario, usuario.usuario) && Objects.equals(usuarios.contrasena, usuario.contrasena)) {
                         String a = "s";
                         enviar_dato.writeUTF("s");
@@ -93,7 +93,7 @@ public class Copia2 {
                         String respuesta = recivir_norma.readUTF();
 
                         if (respuesta.equals("s")) {
-                            Firmado_digital(usuarios);
+                            Firmado_digital(usuario);
                         }
                         es++;
                         break;
@@ -102,29 +102,24 @@ public class Copia2 {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                //System.out.println("Ha ocurrido un error");
             } catch (ClassNotFoundException e) {
                 System.out.println("Ha habido algun error con la clase");
             }
-            mostrar.close();
 
             enviar_dato.writeUTF("d");
             servidor();
+
 
         }
 
         public void Comprobar_normas_banco() throws IOException {
 
-            //   ObjectInputStream outDato = new ObjectInputStream(s.getInputStream());
-            //   DataOutputStream enviar_norma = new DataOutputStream(s.getOutputStream());
-
-
-
-
 
         }
 
-        public void Firmado_digital(Usuarios usuario) throws IOException {
-            // DataInputStream inData = new DataInputStream(s.getInputStream());
+        public void Firmado_digital(Usuarios usuarios) throws IOException {
+            //  DataInputStream inData = new DataInputStream(s.getInputStream());
             DataOutputStream outData = new DataOutputStream(s.getOutputStream());
 
             try {
@@ -150,7 +145,7 @@ public class Copia2 {
                 if (check) {
                     System.out.println("FiRMA VERIFICADA CON CLAVE PÚBLICA.");
                     outData.writeUTF("FiRMA VERIFICADA CON CLAVE PÚBLICA.");
-                    Banca_online(s, usuario);
+                    Banca_online(usuarios);
                 } else {
                     System.out.println("FiRMA NO VERIFICADA");
                     outData.writeUTF("FiRMA NO VERIFICADA");
@@ -165,93 +160,194 @@ public class Copia2 {
                 throw new RuntimeException(e);
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
-            } catch (NoSuchPaddingException e) {
-                throw new RuntimeException(e);
-            } catch (IllegalBlockSizeException e) {
-                throw new RuntimeException(e);
-            } catch (BadPaddingException e) {
-                throw new RuntimeException(e);
             }
 
 
         }
 
-        public void Banca_online(Socket s, Usuarios usuario) throws IOException, NoSuchAlgorithmException, ClassNotFoundException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
-            DataInputStream in = new DataInputStream(s.getInputStream());
+        public void Banca_online(Usuarios usuarios) throws IOException, NoSuchAlgorithmException, ClassNotFoundException {
+            DataInputStream inData = new DataInputStream(s.getInputStream());
             // DataOutputStream outData = new DataOutputStream(s.getOutputStream());
 
             System.out.println("Banca online dentro");
-            int is = in.readInt();
-            System.out.println("banco");
-            if (is == 1){
-                Mostrar_cuentas(usuario);
+            int i = inData.readInt();
+            System.out.println("Dato_2");
 
-            } else if (is == 2) {
-                Registro_servidor();
+            if (i == 1) {
+                Mostrar_cuenta_usuario(usuarios, i);
+
+            } else if (i == 2) {
+                Mostrar_cuenta_usuario(usuarios, i);
+                //Mostrar_cuentas();
                 servidor();
             }
         }
 
-        public void Mostrar_cuentas(Usuarios usuario) throws IOException, ClassNotFoundException, NoSuchPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
-            DataOutputStream outData = new DataOutputStream(s.getOutputStream());
-            ObjectInputStream mostrar = new ObjectInputStream(new FileInputStream("Cuentas.dat"));
-            Cuentas_bancarias usuario1 = (Cuentas_bancarias) mostrar.readObject();
+  /*  public void Mostrar_cuentas() throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
+        DataOutputStream outData = new DataOutputStream(s.getOutputStream());
+        ObjectInputStream mostrar = new ObjectInputStream(new FileInputStream("Cuentas.dat"));
+        Cuentas_bancarias usuario1 = (Cuentas_bancarias) mostrar.readObject();
 
-            try {
-                while (usuario1 != null) {
-                    if (usuario1.usuario.usuario.equals(usuario.usuario)) {
-                        System.out.println("Cuenta bancaria: " + usuario1.cuenta_bancaria);
-                        outData.writeUTF(usuario1.cuenta_bancaria);
-                        usuario1 = (Cuentas_bancarias) mostrar.readObject();
-                    }
-                    //usuario1 = (Cuentas_bancarias) mostrar.readObject();
+        try {
+            while (usuario1 != null) {
+                    System.out.println("Cuenta bancaria: " + usuario1.usuario);
+                    outData.writeUTF(usuario1.cuenta_bancaria);
+                    usuario1 = (Cuentas_bancarias) mostrar.readObject();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-                // System.out.println("Ha ocurrido un error");
-            } catch (ClassNotFoundException e) {
-                System.out.println("Ha habido algun error con la clase");
-            }
-            mostrar.close();
-            Cuenta_Mostrar(usuario);
-
+        } catch (IOException e) {
+            System.out.println("Ha ocurrido un error");
+        } catch (ClassNotFoundException e) {
+            System.out.println("Ha habido algun error con la clase");
         }
+        mostrar.close();
 
-        public void Cuenta_Mostrar(Usuarios usuarios) throws IOException, ClassNotFoundException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-            DataInputStream inData = new DataInputStream(s.getInputStream());
+
+    }*/
+
+        public void Mostrar_cuenta_usuario(Usuarios usuarios, int i) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
             DataOutputStream outData = new DataOutputStream(s.getOutputStream());
-            //    ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
-            //    ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+            // DataInputStream inData = new DataInputStream(s.getInputStream());
             ObjectInputStream mostrar = new ObjectInputStream(new FileInputStream("Cuentas.dat"));
-
-            String mensaje = Cifrado_simentrico();
-
             Cuentas_bancarias usuario1 = (Cuentas_bancarias) mostrar.readObject();
 
             try {
                 while (usuario1 != null) {
-                    if (mensaje.equals(usuario1.cuenta_bancaria) && usuario1.usuario.toString().equals(usuarios.usuario)){
-                        System.out.println("Saldo de la cuenta:" + usuario1.dinero);
-                        outData.writeInt(usuario1.dinero);
+                    if (usuario1.usuario.usuario.equals(usuarios.usuario)) {
+                        System.out.println("Cuenta bancaria: " + usuario1.usuario);
+                        outData.writeUTF(usuario1.cuenta_bancaria);
                         usuario1 = (Cuentas_bancarias) mostrar.readObject();
                     } else {
                         usuario1 = (Cuentas_bancarias) mostrar.readObject();
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
-                //System.out.println("Ha ocurrido un error");
+                System.out.println("Ha ocurrido un error");
             } catch (ClassNotFoundException e) {
                 System.out.println("Ha habido algun error con la clase");
             }
             mostrar.close();
 
-            Banca_online(s, usuarios);
+            if (i == 1) {
+                Cuenta_Mostrar(usuarios);
+            } else if (i == 2) {
+                Transferir_dinero();
+            }
+
+        }
+
+        public void Transferir_dinero() throws IOException {
+            // DataOutputStream outData = new DataOutputStream(s.getOutputStream());
+            DataInputStream inData = new DataInputStream(s.getInputStream());
+            //  ObjectOutputStream enviar_objeto = new ObjectOutputStream(s.getOutputStream());
+            // ObjectInputStream recibir_objeto = new ObjectInputStream(s.getInputStream());
+
+            String cuenta;
+            int dinero;
+
+            int x = inData.readInt();
+
+            doble_certificado();
+
+            //dinero = inData.readInt();
 
 
         }
 
-        public String Cifrado_simentrico() {
+        public void doble_certificado() throws IOException {
+            // DataInputStream inData = new DataInputStream(s.getInputStream());
+            // DataOutputStream enviar_dato = new DataOutputStream(s.getOutputStream());
+            ObjectInputStream recibir_objeto = new ObjectInputStream(s.getInputStream());
+            ObjectOutputStream enviar_objeto = new ObjectOutputStream(s.getOutputStream());
+            Random random = new Random();
+
+            int rand = random.nextInt(0, 100);
+            String num = String.valueOf(rand);
+
+            //enviar_dato.writeInt(rand);
+
+
+            Cipher desCipher;
+            byte[] mensajeEnviadoCifrado;
+
+            try {
+
+                //recogemos del flujo la clave simetrica
+                SecretKey key = (SecretKey) recibir_objeto.readObject();
+                System.out.println("le clave es : " + key);
+                System.out.println("Configurando Cipher para encriptar");
+                desCipher = Cipher.getInstance("DES");
+
+                desCipher.init(Cipher.ENCRYPT_MODE, key);
+                System.out.print("Numero para desencriptar\n");
+
+                mensajeEnviadoCifrado = desCipher.doFinal(num.getBytes());
+
+                enviar_objeto.writeObject(mensajeEnviadoCifrado);
+
+
+            } catch (UnknownHostException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException | ClassNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (NoSuchPaddingException e) {
+                throw new RuntimeException(e);
+            } catch (IllegalBlockSizeException e) {
+                throw new RuntimeException(e);
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
+            } catch (BadPaddingException e) {
+                throw new RuntimeException(e);
+            } catch (InvalidKeyException e) {
+                throw new RuntimeException(e);
+            }
+
+
+        }
+
+
+        public void Cuenta_Mostrar(Usuarios usuarios) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
+            // DataInputStream inData = new DataInputStream(s.getInputStream());
+            DataOutputStream outData = new DataOutputStream(s.getOutputStream());
+            // ObjectOutputStream enviar_objeto = new ObjectOutputStream(s.getOutputStream());
+            ObjectInputStream mostrar = new ObjectInputStream(new FileInputStream("Cuentas.dat"));
+
+            String mensaje = Cifrado_simentrico();
+
+            Cuentas_bancarias usuario1 = (Cuentas_bancarias) mostrar.readObject();
+            int i = 0;
+            try {
+                while (usuario1 != null) {
+                    if (mensaje.equals(usuario1.cuenta_bancaria)) {
+                        System.out.println("Saldo de la cuenta:" + usuario1.dinero);
+                        outData.writeInt(usuario1.dinero);
+                        i++;
+                        usuario1 = (Cuentas_bancarias) mostrar.readObject();
+                    } else {
+                        usuario1 = (Cuentas_bancarias) mostrar.readObject();
+                    }
+                }
+                if (i == 0) {
+                    System.out.println("La cuenta bancaria no existe");
+                    outData.writeInt(-1);
+                }
+            } catch (IOException e) {
+                System.out.println("Ha ocurrido un error");
+            } catch (ClassNotFoundException e) {
+                System.out.println("Ha habido algun error con la clase");
+            }
+
+            mostrar.close();
+
+            Banca_online(usuarios);
+
+        }
+
+        public String Cifrado_simentrico() throws IOException {
+            ObjectOutputStream enviar_objeto = new ObjectOutputStream(s.getOutputStream());
+            ObjectInputStream recibir_objeto = new ObjectInputStream(s.getInputStream());
+
             String mensajeRecibidoDescifrado = "";
             try {
 
@@ -297,24 +393,21 @@ public class Copia2 {
                 }
 
                 // Enviamos la clave
-                ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
-                ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
-                oos.writeObject(key);
+
+                enviar_objeto.writeObject(key);
 
 
-                mensajeRecibido = (byte[]) ois.readObject();
+                mensajeRecibido = (byte[]) recibir_objeto.readObject();
 
                 mensajeRecibidoDescifrado = new String(desCipher.doFinal(mensajeRecibido));
                 System.out.println("El texto enviado por el cliente y descifrado por el servidor es : " + new String(mensajeRecibidoDescifrado));
 
 
-
                 // cierra los paquetes de datos, el socket y el servidor
-                ois.close();
-                oos.close();
+                //ois.close();
+                //oos.close();
 
                 System.out.println("Fin de la conexion");
-
 
 
             } catch (IOException ex) {
@@ -329,34 +422,4 @@ public class Copia2 {
             return new String(mensajeRecibidoDescifrado);
         }
     }
-
-  /*  public void Mostrar_cuenta_usuario(Usuarios usuarios, int i) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
-        DataOutputStream outData = new DataOutputStream(s.getOutputStream());
-        ObjectInputStream mostrar = new ObjectInputStream(new FileInputStream("Cuentas.dat"));
-        Cuentas_bancarias usuario1 = (Cuentas_bancarias) mostrar.readObject();
-
-        try {
-            while (usuario1 != null) {
-                if (usuario1.usuario.usuario.equals(usuarios.usuario)){
-                    System.out.println("Cuenta bancaria: " + usuario1.usuario);
-                    outData.writeUTF(usuario1.cuenta_bancaria);
-                    usuario1 = (Cuentas_bancarias) mostrar.readObject();
-                } else {
-                    usuario1 = (Cuentas_bancarias) mostrar.readObject();
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Ha ocurrido un error");
-        } catch (ClassNotFoundException e) {
-            System.out.println("Ha habido algun error con la clase");
-        }
-        mostrar.close();
-        int c;
-        if (i == 1){
-            Cuenta_Mostrar(usuarios);
-        } else if (i == 2) {
-            Transferir_dinero();
-        }
-
-    }*/
 }

@@ -1,9 +1,10 @@
 import javax.crypto.*;
 import java.io.*;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Scanner;
@@ -16,22 +17,39 @@ public class Main {
     }
 }
 
+/*class Streams {
+
+
+    ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
+    ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
+    DataOutputStream enviar_dato = new DataOutputStream(cliente.getOutputStream());
+    DataInputStream recibir_dato = new DataInputStream(cliente.getInputStream());
+
+    public Streams() throws IOException {
+
+    }
+
+}*/
 class Cliente {
     static Scanner scanner = new Scanner(System.in);
 
+
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
-        Seleccion();
+        Socket cliente = new Socket("localhost", 5557);
+
+        ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
+        ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
+        DataOutputStream enviar_dato = new DataOutputStream(cliente.getOutputStream());
+        DataInputStream recibir_dato = new DataInputStream(cliente.getInputStream());
+
+        Seleccion(cliente, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
     }
 
-    public static void Seleccion() throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
+    public static void Seleccion(Socket cliente, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
         int num = 0;
 
-        Socket cliente = new Socket("localhost", 5556);
 
-       // ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
-       // ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
-        DataOutputStream enviar_dato = new DataOutputStream(cliente.getOutputStream());
-       // DataInputStream recibir_dato = new DataInputStream(cliente.getInputStream());
+
 
         try {
             do {
@@ -51,10 +69,10 @@ class Cliente {
 
         if (num == 1) {
             enviar_dato.writeInt(1);
-            Iniciar_sesion(cliente);
+            Iniciar_sesion(cliente, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
         } else if (num == 2) {
             enviar_dato.writeInt(2);
-            Registrarse(cliente);
+            Registrarse(cliente, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
         } else if (num == 9) {
             System.exit(0);
         }
@@ -62,18 +80,13 @@ class Cliente {
 
     }
 
-    public static void Registrarse(Socket cliente) throws NoSuchAlgorithmException, IOException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
+    public static void Registrarse(Socket cliente, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws NoSuchAlgorithmException, IOException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
         String nombre;
         String apellido = null;
         int edad = 0;
         String email = null;
         String usuarioo = null;
         String contrasena;
-
-        ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
-       // ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
-       // DataOutputStream enviar_dato = new DataOutputStream(cliente.getOutputStream());
-       // DataInputStream recibir_dato = new DataInputStream(cliente.getInputStream());
 
         System.out.println("Menu de registro");
 
@@ -121,7 +134,7 @@ class Cliente {
             do {
                 System.out.println("\nIntroduce tu email: ");
                 email = scanner.nextLine();
-                pat = Pattern.compile("^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+.[a-zA-Z0-9.-]$");
+                pat = Pattern.compile("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
                 mat = pat.matcher(email);
                 if (!mat.find()) {
                     System.out.println("email no valido");
@@ -175,19 +188,16 @@ class Cliente {
 
         System.out.println("Usuario y cuenta creado");
 
-        Seleccion();
+        Seleccion(cliente, enviar_objeto,recibir_objeto, enviar_dato, recibir_dato);
 
     }
 
-    public static void Iniciar_sesion(Socket cliente) throws NoSuchAlgorithmException, IOException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
+    public static void Iniciar_sesion(Socket cliente, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws NoSuchAlgorithmException, IOException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
         String usuarioo = null;
         String contrasena;
 
         System.out.println("Ha entrado en Inicio de sesión");
-        ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
-       // ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
-       // DataOutputStream enviar_dato = new DataOutputStream(cliente.getOutputStream());
-        DataInputStream recibir_dato = new DataInputStream(cliente.getInputStream());
+
 
         System.out.println("Inicio de sesión");
 
@@ -228,7 +238,7 @@ class Cliente {
 
         if (!inicio.equals("s")){
             System.out.println("No se ha podido iniciar sesión");
-            Seleccion();
+            Seleccion(cliente, enviar_objeto,recibir_objeto, enviar_dato, recibir_dato);
         } else {
             DataOutputStream out = new DataOutputStream(cliente.getOutputStream());
             System.out.println("Te has conectado");
@@ -245,7 +255,7 @@ class Cliente {
                 if (Objects.equals(contrat, "s")) {
                     out.writeUTF("s");
                 } else if (contrat == "n" || contrat != "s") {
-                    Seleccion();
+                    Seleccion(cliente, enviar_objeto,recibir_objeto, enviar_dato, recibir_dato);
 
                 }
 
@@ -254,15 +264,15 @@ class Cliente {
                 String respuesta = recibir_dato.readUTF();
 
                 if (respuesta.equals(resu)) {
-                    Menu_banca(cliente);
+                    Menu_banca(cliente, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
                 } else if (respuesta.equals(resu2)) {
                     System.out.println("Firma fallida");
-                    Seleccion();
+                    Seleccion(cliente, enviar_objeto,recibir_objeto, enviar_dato, recibir_dato);
                 }
 
             } else {
                 System.out.println("Volviendo al menu");
-                Seleccion();
+                Seleccion(cliente, enviar_objeto,recibir_objeto, enviar_dato, recibir_dato);
             }
 
         }
@@ -270,12 +280,7 @@ class Cliente {
 
     }
 
-    public static void Menu_banca(Socket cliente) throws IOException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
-      //  ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
-      //  ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
-        DataOutputStream enviar_dato = new DataOutputStream(cliente.getOutputStream());
-      //  DataInputStream recibir_dato = new DataInputStream(cliente.getInputStream());
-
+    public static void Menu_banca(Socket cliente, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
 
         int opcion = 0;
 
@@ -298,22 +303,22 @@ class Cliente {
         if (opcion == 1) {
             enviar_dato.writeInt(1);
             opcion = 0;
-            Ver_saldo(cliente);
+            Ver_saldo(cliente, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
         } else if (opcion == 2) {
             enviar_dato.writeInt(2);
             opcion = 0;
-
+            Transferencia_dinero(cliente, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
         } else if (opcion == 9) {
             System.exit(0);
         }
 
     }
 
-    public static void Ver_saldo(Socket cliente) throws IOException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
-       // ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
-       // ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
-        DataOutputStream enviar_dato = new DataOutputStream(cliente.getOutputStream());
-        DataInputStream recibir_dato = new DataInputStream(cliente.getInputStream());
+    public static void Ver_saldo(Socket cliente, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
+        // ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
+        // ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
+        // DataOutputStream enviar_dato = new DataOutputStream(cliente.getOutputStream());
+        // DataInputStream recibir_dato = new DataInputStream(cliente.getInputStream());
 
         String sec_cuenta;
 
@@ -324,27 +329,27 @@ class Cliente {
         System.out.println("Inserta el numero de la cuenta: ");
         sec_cuenta = scanner.nextLine();
 
-        Cifrado_simetrico(cliente, sec_cuenta);
+        Cifrado_simetrico(cliente, sec_cuenta, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
 
         int dinero = recibir_dato.readInt();
 
         if (dinero == -1){
             System.out.println("La cuenta bancaria no existe");
-            Menu_banca(cliente);
+            Menu_banca(cliente, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
         }
 
         System.out.println("Dinero en la cuenta: " + dinero);
 
-        Menu_banca(cliente);
+        Menu_banca(cliente, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
     }
 
-    public static void Cifrado_simetrico(Socket cliente, String cuenta) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException, IOException {
-       // DataInputStream in = new DataInputStream(cliente.getInputStream());
-       // DataOutputStream out = new DataOutputStream(cliente.getOutputStream());
-        ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
-        ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
+    public static void Cifrado_simetrico(Socket cliente, String cuenta, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException, IOException {
+        // DataInputStream in = new DataInputStream(cliente.getInputStream());
+        // DataOutputStream out = new DataOutputStream(cliente.getOutputStream());
+        // ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
+        // ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
 
-        String mensaje = "";
+        //String mensaje = "";
         //String key;
         Cipher desCipher;
         byte[] mensajeEnviadoCifrado;
@@ -375,27 +380,164 @@ class Cliente {
         }
     }
 
-    public void Transferencia_dinero(Socket cliente) throws IOException {
+    public static void Transferencia_dinero(Socket cliente, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
         // ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
         // ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
-        DataOutputStream enviar_dato = new DataOutputStream(cliente.getOutputStream());
-        DataInputStream recibir_dato = new DataInputStream(cliente.getInputStream());
+        // DataOutputStream enviar_dato = new DataOutputStream(cliente.getOutputStream());
+        // DataInputStream recibir_dato = new DataInputStream(cliente.getInputStream());
 
         String sec_cuenta;
+        int din;
 
         String zz = recibir_dato.readUTF();
 
-        System.out.println("Tu cuenta: " + zz);
+        System.out.println("Tu cuenta del que saldra el dinero: " + zz);
+
+        //Cifrado_simetrico(cliente, zz);
 
         System.out.println("Inserta el numero de la cuenta a donde enviar el dinero: ");
         sec_cuenta = scanner.nextLine();
 
+        System.out.println("Dinero de la transferencia");
+        din = scanner.nextInt();
+        scanner.nextLine();
+
+        enviar_dato.writeInt(din);
+
+        enviar_dato.writeInt(1);
+
+        String num = Cifrado_simentrico_trans(cliente, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
+
+        System.out.println(num);
+
+        System.out.println("Ingresa el numero que aparece para completar la transacción: ");
+        String as = scanner.nextLine();
+
+        if (num.equals(as)){
+            enviar_dato.writeInt(1);
+        } else {
+            enviar_dato.writeInt(2);
+        }
 
 
 
-        enviar_dato.writeUTF(sec_cuenta);
+
 
     }
+    public static void Cifrado_simetrico_trans(Socket cliente, String cuenta, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException, IOException {
+        // DataInputStream in = new DataInputStream(cliente.getInputStream());
+        // DataOutputStream out = new DataOutputStream(cliente.getOutputStream());
+        // ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
+        // ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
+
+        //String mensaje = "";
+        //String key;
+        Cipher desCipher;
+        byte[] mensajeEnviadoCifrado;
+
+        try
+        {
+
+            //recogemos del flujo la clave simetrica
+            SecretKey key = (SecretKey) recibir_objeto.readObject();
+            System.out.println("le clave es : " + key);
+            System.out.println("Configurando Cipher para encriptar");
+            desCipher = Cipher.getInstance("DES");
+
+            desCipher.init(Cipher.DECRYPT_MODE, key);
+            System.out.print("Inserta \n");
+
+            mensajeEnviadoCifrado = desCipher.doFinal(cuenta.getBytes());
+
+            enviar_objeto.writeObject(mensajeEnviadoCifrado);
+
+
+        } catch (UnknownHostException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    public static String Cifrado_simentrico_trans(Socket cliente, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException {
+        String mensajeRecibidoDescifrado = "";
+        // ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
+        // ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
+        try {
+
+            byte[] mensajeRecibido = null;
+
+            KeyGenerator keygen = null;
+            Cipher desCipher = null;
+
+
+            System.out.println("Obteniendo generador de claves con cifrado DES");
+            try {
+                keygen = KeyGenerator.getInstance("DES");
+            } catch (NoSuchAlgorithmException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            System.out.println("Generando clave");
+            SecretKey key = keygen.generateKey();
+            // //////////////////////////////////////////////////////////////
+            // CONVERTIR CLAVE A STRING Y VISUALIZAR/////////////////////////
+            // obteniendo la version codificada en base 64 de la clave
+
+            System.out.println("La clave es: " + key);
+
+            // //////////////////////////////////////////////////////////////
+            // CREAR CIFRADOR Y PONER EN MODO DESCIFRADO//////////////////
+            System.out.println("Obteniendo objeto Cipher con cifraddo DES");
+            try {
+                desCipher = Cipher.getInstance("DES");
+            } catch (NoSuchAlgorithmException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (NoSuchPaddingException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            System.out.println("Configurando Cipher para desencriptar");
+            try {
+                desCipher.init(Cipher.DECRYPT_MODE, key);
+            } catch (InvalidKeyException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+            // Enviamos la clave
+            enviar_objeto.writeObject(key);
+
+
+            mensajeRecibido = (byte[]) recibir_objeto.readObject();
+
+            mensajeRecibidoDescifrado = new String(desCipher.doFinal(mensajeRecibido));
+            System.out.println("El texto enviado por el cliente y descifrado por el servidor es : " + new String(mensajeRecibidoDescifrado));
+
+
+
+            // cierra los paquetes de datos, el socket y el servidor
+
+
+            System.out.println("Fin de la conexion");
+
+
+
+        } catch (IOException ex) {
+            // Logger.getLogger(hilo.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalBlockSizeException e) {
+            throw new RuntimeException(e);
+        } catch (BadPaddingException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return new String(mensajeRecibidoDescifrado);
+    }
+
 
 }
 
