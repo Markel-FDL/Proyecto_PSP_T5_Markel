@@ -55,7 +55,7 @@ public class Hilos implements Runnable{
 
     }
 
-    public void Registro_servidor(ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException, ClassNotFoundException {
+    public void Registro_servidor(ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
 
         Usuarios usuario = (Usuarios) recibir_objeto.readObject();
         Cuentas_bancarias cuenta = (Cuentas_bancarias) recibir_objeto.readObject();
@@ -69,7 +69,7 @@ public class Hilos implements Runnable{
 
         System.out.println("Usuario creado");
 
-
+        servidor(enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
 
     }
 
@@ -184,7 +184,7 @@ public class Hilos implements Runnable{
         } else if (i == 2) {
             Mostrar_cuenta_usuario(usuarios, i, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
             //Mostrar_cuentas();
-            servidor(enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
+            Banca_online(usuarios, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
         }
     }
 
@@ -254,14 +254,33 @@ public class Hilos implements Runnable{
 
         int x = recibir_dato.readInt();
 
+        cuenta = recibir_dato.readUTF();
+
         doble_certificado(enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
 
-        dinero = recibir_dato.readInt();
+        //dinero = recibir_dato.readInt();
 
         int d = recibir_dato.readInt();
         if (d == 1){
             System.out.println("Transacción Completada");
             // TODO: Continuar
+            Cuentas_bancarias cuentas = new Cuentas_bancarias();
+            Cuentas_bancarias cuentaa = cuentas.Comprobar_cuenta(cuenta);
+            if (cuentaa == null){
+                Cuentas_bancarias cuen = cuentas.Comprobar_cuenta2(usuario);
+                int di = cuen.getDinero();
+                int zc = di - dinero;
+                cuen.setDinero(zc);
+                cuentas.Modificar_cuentas_bancarias(cuen);
+            } else {
+                cuentaa.setDinero(dinero);
+                Cuentas_bancarias cuen = cuentas.Comprobar_cuenta2(usuario);
+                int di = cuen.getDinero();
+                int zc = di - dinero;
+                cuen.setDinero(zc);
+                cuentas.Modificar_cuentas_bancarias(cuen);
+                cuentas.Modificar_cuentas_bancarias(cuentaa);
+            }
         } else if (d == 2){
             System.out.println("No se corresponde. Vuelta al menú");
             Banca_online(usuario ,enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
@@ -358,7 +377,7 @@ public class Hilos implements Runnable{
 
         mostrar.close();
 
-        //Banca_online(usuarios, );
+        Banca_online(usuarios, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
 
     }
 

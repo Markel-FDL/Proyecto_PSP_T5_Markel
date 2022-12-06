@@ -406,6 +406,8 @@ class Cliente {
 
         enviar_dato.writeInt(1);
 
+        enviar_dato.writeUTF(sec_cuenta);
+
         String num = Cifrado_simentrico_trans(cliente, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
 
         System.out.println(num);
@@ -419,7 +421,7 @@ class Cliente {
             enviar_dato.writeInt(2);
         }
 
-
+        Menu_banca(cliente, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
 
 
 
