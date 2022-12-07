@@ -8,6 +8,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,6 +34,7 @@ public class Main {
 class Cliente {
     static Scanner scanner = new Scanner(System.in);
 
+    Logger logger = Logger.getLogger("MyLog");
 
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
         Socket cliente = new Socket("localhost", 5557);
@@ -539,7 +541,7 @@ class Cliente {
             // cierra los paquetes de datos, el socket y el servidor
 
 
-            System.out.println("Fin de la conexion");
+            //System.out.println("Fin de la conexion");
 
 
 
