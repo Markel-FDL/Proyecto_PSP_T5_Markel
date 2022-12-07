@@ -24,7 +24,7 @@ public class Cuentas_bancarias implements Serializable {
     }
 
     public void Mostrar() {
-        System.out.println("Usuario: " + usuario.usuario + " \nCuenta bancaria: " + cuenta_bancaria + "\nDinero: " + dinero);
+        System.out.println("Usuario: " + usuario.usuario + " \nCuenta bancaria: " + cuenta_bancaria + "\nDinero: " + dinero+ "\n");
     }
 
     public void escribir_cuentas_bancarias(Cuentas_bancarias cuenta) throws IOException, ClassNotFoundException {
@@ -70,7 +70,7 @@ public class Cuentas_bancarias implements Serializable {
 
     public void Modificar_cuentas_bancarias(Cuentas_bancarias cuenta) throws IOException, ClassNotFoundException {
 
-
+        cuentas_bancarias.clear();
 
         File f = new File("Cuentas.dat");
         if (!f.isFile()) {

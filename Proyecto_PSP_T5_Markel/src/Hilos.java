@@ -84,22 +84,37 @@ public class Hilos implements Runnable{
         try {
             while (usuarios != null){
                 if (Objects.equals(usuarios.usuario, usuario.usuario) && Objects.equals(usuarios.contrasena, usuario.contrasena)) {
-                    String a = "s";
                     enviar_dato.writeUTF("s");
                     System.out.println("Concuerda");
                     String ds = recibir_dato.readUTF();
+                    if (ds.equals("s")){
+                        String contrato = "Normas del banco.";
 
-                    String contrato = "Normas del banco.";
+                        enviar_dato.writeUTF(contrato);
 
-                    enviar_dato.writeUTF(contrato);
+                        String respuesta = recibir_dato.readUTF();
 
-                    String respuesta = recibir_dato.readUTF();
+                        if (respuesta.equals("s")) {
+                            Firmado_digital(usuario, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
+                        } else {
+                            System.out.println("Vuelves al menú");
+                          //  enviar_dato.writeUTF("n");
+                            mostrar.close();
+                            servidor(enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
+                        }
+                        es++;
+                        break;
+                    } else {
+                        System.out.println("Vuelves al menú");
+                       // enviar_dato.writeUTF("n");
+                        mostrar.close();
+                        servidor(enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
 
-                    if (respuesta.equals("s")) {
-                        Firmado_digital(usuario, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
                     }
-                    es++;
-                    break;
+                } else {
+                    System.out.println("Vuelves al menú");
+                    mostrar.close();
+                    servidor(enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
                 }
                 usuarios = (Usuarios) mostrar.readObject();
             }
@@ -111,6 +126,7 @@ public class Hilos implements Runnable{
         }
 
         enviar_dato.writeUTF("d");
+        mostrar.close();
         servidor(enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
 
 
@@ -265,21 +281,25 @@ public class Hilos implements Runnable{
             System.out.println("Transacción Completada");
             // TODO: Continuar
             Cuentas_bancarias cuentas = new Cuentas_bancarias();
+            // Cuenta del usuario al que enviamos el dinero
             Cuentas_bancarias cuentaa = cuentas.Comprobar_cuenta(cuenta);
+            // Cuenta del usuario del que quitamos el dinero
+            Cuentas_bancarias cuen = cuentas.Comprobar_cuenta2(usuario);
             if (cuentaa == null){
-                Cuentas_bancarias cuen = cuentas.Comprobar_cuenta2(usuario);
                 int di = cuen.getDinero();
                 int zc = di - dinero;
                 cuen.setDinero(zc);
                 cuentas.Modificar_cuentas_bancarias(cuen);
             } else {
-                cuentaa.setDinero(dinero);
-                Cuentas_bancarias cuen = cuentas.Comprobar_cuenta2(usuario);
-                int di = cuen.getDinero();
-                int zc = di - dinero;
-                cuen.setDinero(zc);
-                cuentas.Modificar_cuentas_bancarias(cuen);
+                int din = cuentaa.getDinero();
+                int zc = din + dinero;
+                cuentaa.setDinero(zc);
                 cuentas.Modificar_cuentas_bancarias(cuentaa);
+                int di = cuen.getDinero();
+                int zcs = di - dinero;
+                cuen.setDinero(zcs);
+                cuentas.Modificar_cuentas_bancarias(cuen);
+
             }
         } else if (d == 2){
             System.out.println("No se corresponde. Vuelta al menú");

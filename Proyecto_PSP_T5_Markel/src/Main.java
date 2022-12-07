@@ -114,24 +114,27 @@ class Cliente {
             System.out.println("Error");
         }
 
-        try {
-            do {
+        do {
+            try {
                 System.out.println("\nEdad: ");
                 edad = scanner.nextInt();
                 scanner.nextLine();
                 if (edad < 0 || edad > 110) {
                     System.out.println("No puedes ingresar esa edad");
                 }
-            } while (edad < 0 || edad > 110);
+
         } catch (Exception e) {
             System.out.println("Error");
+            scanner.nextLine();
         }
+        } while (edad < 0 || edad > 110);
 
         Pattern pat;
         Matcher mat;
         boolean s = true;
         try {
             do {
+                s = true;
                 System.out.println("\nIntroduce tu email: ");
                 email = scanner.nextLine();
                 pat = Pattern.compile("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
@@ -240,30 +243,30 @@ class Cliente {
             System.out.println("No se ha podido iniciar sesión");
             Seleccion(cliente, enviar_objeto,recibir_objeto, enviar_dato, recibir_dato);
         } else {
-            DataOutputStream out = new DataOutputStream(cliente.getOutputStream());
             System.out.println("Te has conectado");
 
 
             System.out.println("\nQuieres ver el contrato? (s/n) (es necesario para continuar): ");
             String az = scanner.nextLine();
             if (Objects.equals(az, "s")) {
-                out.writeUTF("s");
+                enviar_dato.writeUTF("s");
                 String contrato = recibir_dato.readUTF();
                 System.out.println(contrato);
                 System.out.println("\nAceptas el contrato? (s/n): ");
                 String contrat = scanner.nextLine();
                 if (Objects.equals(contrat, "s")) {
-                    out.writeUTF("s");
+                    enviar_dato.writeUTF("s");
                 } else if (contrat == "n" || contrat != "s") {
+                    enviar_dato.writeUTF("n");
+                    System.out.println("Vuelves al menú");
                     Seleccion(cliente, enviar_objeto,recibir_objeto, enviar_dato, recibir_dato);
-
                 }
-
                 String resu = "FiRMA VERIFICADA CON CLAVE PÚBLICA.";
                 String resu2 = "FiRMA NO VERIFICADA";
                 String respuesta = recibir_dato.readUTF();
 
                 if (respuesta.equals(resu)) {
+                    System.out.println("Vuelves al menú");
                     Menu_banca(cliente, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
                 } else if (respuesta.equals(resu2)) {
                     System.out.println("Firma fallida");
@@ -272,6 +275,7 @@ class Cliente {
 
             } else {
                 System.out.println("Volviendo al menu");
+                enviar_dato.writeUTF("n");
                 Seleccion(cliente, enviar_objeto,recibir_objeto, enviar_dato, recibir_dato);
             }
 
@@ -387,7 +391,7 @@ class Cliente {
         // DataInputStream recibir_dato = new DataInputStream(cliente.getInputStream());
 
         String sec_cuenta;
-        int din;
+
 
         String zz = recibir_dato.readUTF();
 
@@ -398,9 +402,20 @@ class Cliente {
         System.out.println("Inserta el numero de la cuenta a donde enviar el dinero: ");
         sec_cuenta = scanner.nextLine();
 
-        System.out.println("Dinero de la transferencia");
-        din = scanner.nextInt();
-        scanner.nextLine();
+        int din = 0;
+        do {
+            try {
+                System.out.println("Dinero de la transferencia");
+                din = scanner.nextInt();
+                scanner.nextLine();
+            } catch (Exception e) {
+                System.out.println("Error en el dato insertado");
+                din = 0;
+                scanner.nextLine();
+
+            }
+        } while (din <= 0 || din > 10000);
+
 
         enviar_dato.writeInt(din);
 

@@ -31,7 +31,7 @@ public class Usuarios implements Serializable{
 
 
         public void Mostrar(){
-            System.out.println("Nombre: " + nombre + " \nApellido: " + apellido + "\nEdad: " + edad + "\nEmail: " + email + "\nUsuario: " + usuario + "\ncontrasena: " + contrasena);
+            System.out.println("Nombre: " + nombre + " \nApellido: " + apellido + "\nEdad: " + edad + "\nEmail: " + email + "\nUsuario: " + usuario + "\ncontrasena: " + contrasena + "\n");
         }
 
        public void escribir_usuario(Usuarios usuario) throws IOException, ClassNotFoundException {
