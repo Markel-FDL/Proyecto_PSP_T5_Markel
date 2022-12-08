@@ -6,8 +6,10 @@ import java.net.UnknownHostException;
 import java.security.*;
 import java.util.Objects;
 import java.util.Random;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 public class Hilos implements Runnable{
 
@@ -24,6 +26,20 @@ public class Hilos implements Runnable{
     @Override
     public void run() {
         try {
+
+            Logger logger = Logger.getLogger("MyLog");
+
+            FileHandler fh;
+
+            fh = new FileHandler("./log_actividad_server.log", true);
+
+            logger.setUseParentHandlers(false);
+            SimpleFormatter formato = new SimpleFormatter();
+            fh. setFormatter(formato);
+
+            logger.setLevel(Level.ALL);
+            logger.addHandler(fh);
+
             ObjectInputStream recibir_objeto = new ObjectInputStream(s.getInputStream());
             DataInputStream recibir_dato = new DataInputStream(s.getInputStream());
             ObjectOutputStream enviar_objeto = new ObjectOutputStream(s.getOutputStream());
@@ -130,8 +146,9 @@ public class Hilos implements Runnable{
 
                     }
                 } else {
-                    System.out.println("Vuelves al menú");
-                    logger.log(Level.WARNING,"\tEl usuario ha rechazado el contrato. Nombre: " + usuario.nombre + "  Usuario: " + usuario.usuario);
+                    System.out.println("El usuario y/o contraseña no existe. Vuelves al menú");
+                    enviar_dato.writeUTF("n");
+                    logger.log(Level.WARNING,"\tEl usuario insertado no existe. Nombre: " + usuario.nombre + "  Usuario: " + usuario.usuario);
                     mostrar.close();
                     servidor(enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
                 }
@@ -140,10 +157,10 @@ public class Hilos implements Runnable{
         } catch (IOException e) {
             e.printStackTrace();
             //System.out.println("Ha ocurrido un error");
-            logger.log(Level.WARNING,"\tError al iniciar error. Nombre: " + usuario.nombre + "  Usuario: " + usuario.usuario);
+            logger.log(Level.WARNING,"\tError al iniciar error. Usuario: " + usuario.usuario);
         } catch (ClassNotFoundException e) {
             System.out.println("Ha habido algun error con la clase");
-            logger.log(Level.WARNING,"\tError al iniciar error. Nombre: " + usuario.nombre + "  Usuario: " + usuario.usuario);
+            logger.log(Level.WARNING,"\tError al iniciar error. Usuario: " + usuario.usuario);
         }
 
         enviar_dato.writeUTF("d");
@@ -189,12 +206,12 @@ public class Hilos implements Runnable{
             if (check) {
                 System.out.println("FiRMA VERIFICADA CON CLAVE PÚBLICA.");
                 enviar_dato.writeUTF("FiRMA VERIFICADA CON CLAVE PÚBLICA.");
-                logger.log(Level.INFO,"\tEl usuario va ha firmar el contrato. Nombre: " + usuarios.nombre + "  Usuario: " + usuarios.usuario);
+                logger.log(Level.INFO,"\tEl usuario ha iniciado sesión. Usuario: " + usuarios.usuario);
                 Banca_online(usuarios, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
             } else {
                 System.out.println("FiRMA NO VERIFICADA");
                 enviar_dato.writeUTF("FiRMA NO VERIFICADA");
-                logger.log(Level.WARNING,"\tError al iniciar sesión en el firmado digital. Nombre: " + usuarios.nombre + "  Usuario: " + usuarios.usuario);
+                logger.log(Level.WARNING,"\tError al iniciar sesión en el firmado digital. Usuario: " + usuarios.usuario);
                 servidor(enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
             }
 
@@ -266,11 +283,11 @@ public class Hilos implements Runnable{
             }
         } catch (IOException e) {
             System.out.println("Ha ocurrido un error");
-            logger.log(Level.WARNING,"\tError al mostrar usuarios. Nombre: " + usuarios.nombre + "  Usuario: " + usuarios.usuario);
+            logger.log(Level.WARNING,"\tError al mostrar usuarios. Usuario: " + usuarios.usuario);
 
         } catch (ClassNotFoundException e) {
             System.out.println("Ha habido algun error con la clase");
-            logger.log(Level.WARNING,"\tError al mostrar usuarios. Nombre: " + usuarios.nombre + "  Usuario: " + usuarios.usuario);
+            logger.log(Level.WARNING,"\tError al mostrar usuarios. Usuario: " + usuarios.usuario);
         }
         mostrar.close();
 
@@ -316,6 +333,7 @@ public class Hilos implements Runnable{
                 int zc = di - dinero;
                 cuen.setDinero(zc);
                 cuentas.Modificar_cuentas_bancarias(cuen);
+                logger.log(Level.INFO,"\tTransferencia completada. Usuario: " + usuario.usuario);
             } else {
                 int din = cuentaa.getDinero();
                 int zc = din + dinero;
@@ -325,7 +343,7 @@ public class Hilos implements Runnable{
                 int zcs = di - dinero;
                 cuen.setDinero(zcs);
                 cuentas.Modificar_cuentas_bancarias(cuen);
-                logger.log(Level.INFO,"\tTransferencia completada. Nombre: " + usuario.nombre + "  Usuario: " + usuario.usuario);
+                logger.log(Level.INFO,"\tTransferencia completada. Usuario: " + usuario.usuario);
             }
         } else if (d == 2){
             System.out.println("No se corresponde. Vuelta al menú");
@@ -405,7 +423,7 @@ public class Hilos implements Runnable{
                 if (mensaje.equals(usuario1.cuenta_bancaria)){
                     System.out.println("Saldo de la cuenta:" + usuario1.dinero);
                     enviar_dato.writeInt(usuario1.dinero);
-                    logger.log(Level.INFO,"\tVer saldo completada. Nombre: " + usuarios.nombre + "  Usuario: " + usuarios.usuario);
+                    logger.log(Level.INFO,"\tVer saldo completada. Usuario: " + usuarios.usuario);
                     i++;
                     usuario1 = (Cuentas_bancarias) mostrar.readObject();
                 } else {
@@ -418,10 +436,10 @@ public class Hilos implements Runnable{
             }
         } catch (IOException e) {
             System.out.println("Ha ocurrido un error");
-            logger.log(Level.WARNING,"\tError al mostrar cuenta. Nombre: " + usuarios.nombre + "  Usuario: " + usuarios.usuario);
+            logger.log(Level.WARNING,"\tError al mostrar cuenta. Usuario: " + usuarios.usuario);
         } catch (ClassNotFoundException e) {
             System.out.println("Ha habido algun error con la clase");
-            logger.log(Level.WARNING,"\tError al mostrar cuenta. Nombre: " + usuarios.nombre + "  Usuario: " + usuarios.usuario);
+            logger.log(Level.WARNING,"\tError al mostrar cuenta. Usuario: " + usuarios.usuario);
         }
 
         mostrar.close();

@@ -8,7 +8,10 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,10 +37,23 @@ public class Main {
 class Cliente {
     static Scanner scanner = new Scanner(System.in);
 
-    Logger logger = Logger.getLogger("MyLog");
+
 
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
         Socket cliente = new Socket("localhost", 5557);
+
+        FileHandler fh;
+
+        Logger logger = Logger.getLogger("MyLog");
+
+        fh = new FileHandler("./log_actividad_cliente.log", true);
+
+        logger.setUseParentHandlers(false);
+        SimpleFormatter formato = new SimpleFormatter();
+        fh. setFormatter(formato);
+
+        logger.setLevel(Level.ALL);
+        logger.addHandler(fh);
 
         ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
         ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
