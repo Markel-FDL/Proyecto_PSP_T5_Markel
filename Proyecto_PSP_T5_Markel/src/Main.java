@@ -71,7 +71,7 @@ class Cliente {
 
         try {
             do {
-                System.out.println("Bienvenido a la banca online");
+                System.out.println("Bienvenido al menu principal de la banca online");
                 System.out.println("\n1. Iniciar sesión");
                 System.out.println("2. Registrarse");
                 System.out.println("Selecciona una opción (9 salir): ");
@@ -381,12 +381,12 @@ class Cliente {
 
             //recogemos del flujo la clave simetrica
             SecretKey key = (SecretKey) recibir_objeto.readObject();
-            System.out.println("le clave es : " + key);
-            System.out.println("Configurando Cipher para encriptar");
+           // System.out.println("le clave es : " + key);
+           // System.out.println("Configurando Cipher para encriptar");
             desCipher = Cipher.getInstance("DES");
 
             desCipher.init(Cipher.ENCRYPT_MODE, key);
-            System.out.print("Reocgiendo mensajes\n");
+           // System.out.print("Reocgiendo mensajes\n");
 
             mensajeEnviadoCifrado = desCipher.doFinal(cuenta.getBytes());
 
@@ -475,12 +475,12 @@ class Cliente {
 
             //recogemos del flujo la clave simetrica
             SecretKey key = (SecretKey) recibir_objeto.readObject();
-            System.out.println("le clave es : " + key);
-            System.out.println("Configurando Cipher para encriptar");
+        //    System.out.println("le clave es : " + key);
+        //    System.out.println("Configurando Cipher para encriptar");
             desCipher = Cipher.getInstance("DES");
 
             desCipher.init(Cipher.DECRYPT_MODE, key);
-            System.out.print("Inserta \n");
+        //    System.out.print("Inserta \n");
 
             mensajeEnviadoCifrado = desCipher.doFinal(cuenta.getBytes());
 
@@ -508,24 +508,19 @@ class Cliente {
             Cipher desCipher = null;
 
 
-            System.out.println("Obteniendo generador de claves con cifrado DES");
+        //    System.out.println("Obteniendo generador de claves con cifrado DES");
             try {
                 keygen = KeyGenerator.getInstance("DES");
             } catch (NoSuchAlgorithmException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            System.out.println("Generando clave");
+        //    System.out.println("Generando clave");
             SecretKey key = keygen.generateKey();
-            // //////////////////////////////////////////////////////////////
-            // CONVERTIR CLAVE A STRING Y VISUALIZAR/////////////////////////
-            // obteniendo la version codificada en base 64 de la clave
 
-            System.out.println("La clave es: " + key);
+         //   System.out.println("La clave es: " + key);
 
-            // //////////////////////////////////////////////////////////////
-            // CREAR CIFRADOR Y PONER EN MODO DESCIFRADO//////////////////
-            System.out.println("Obteniendo objeto Cipher con cifraddo DES");
+         //   System.out.println("Obteniendo objeto Cipher con cifraddo DES");
             try {
                 desCipher = Cipher.getInstance("DES");
             } catch (NoSuchAlgorithmException e) {
@@ -535,7 +530,7 @@ class Cliente {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            System.out.println("Configurando Cipher para desencriptar");
+           // System.out.println("Configurando Cipher para desencriptar");
             try {
                 desCipher.init(Cipher.DECRYPT_MODE, key);
             } catch (InvalidKeyException e) {
@@ -550,7 +545,7 @@ class Cliente {
             mensajeRecibido = (byte[]) recibir_objeto.readObject();
 
             mensajeRecibidoDescifrado = new String(desCipher.doFinal(mensajeRecibido));
-            System.out.println("El texto enviado por el cliente y descifrado por el servidor es : " + new String(mensajeRecibidoDescifrado));
+         //   System.out.println("El texto enviado por el cliente y descifrado por el servidor es : " + new String(mensajeRecibidoDescifrado));
 
 
 
