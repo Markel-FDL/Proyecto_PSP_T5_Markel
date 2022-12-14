@@ -20,20 +20,6 @@ public class Main {
 
     }
 }
-
-/*class Streams {
-
-
-    ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
-    ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
-    DataOutputStream enviar_dato = new DataOutputStream(cliente.getOutputStream());
-    DataInputStream recibir_dato = new DataInputStream(cliente.getInputStream());
-
-    public Streams() throws IOException {
-
-    }
-
-}*/
 class Cliente {
     static Scanner scanner = new Scanner(System.in);
 
@@ -42,18 +28,6 @@ class Cliente {
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
         Socket cliente = new Socket("localhost", 5557);
 
-        FileHandler fh;
-
-        Logger logger = Logger.getLogger("MyLog");
-
-        fh = new FileHandler("./log_actividad_cliente.log", true);
-
-        logger.setUseParentHandlers(false);
-        SimpleFormatter formato = new SimpleFormatter();
-        fh. setFormatter(formato);
-
-        logger.setLevel(Level.ALL);
-        logger.addHandler(fh);
 
         ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
         ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
@@ -379,14 +353,12 @@ class Cliente {
         try
         {
 
-            //recogemos del flujo la clave simetrica
+
             SecretKey key = (SecretKey) recibir_objeto.readObject();
-           // System.out.println("le clave es : " + key);
-           // System.out.println("Configurando Cipher para encriptar");
+
             desCipher = Cipher.getInstance("DES");
 
             desCipher.init(Cipher.ENCRYPT_MODE, key);
-           // System.out.print("Reocgiendo mensajes\n");
 
             mensajeEnviadoCifrado = desCipher.doFinal(cuenta.getBytes());
 
@@ -459,42 +431,6 @@ class Cliente {
 
 
     }
-    public static void Cifrado_simetrico_trans(Socket cliente, String cuenta, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException, IOException {
-        // DataInputStream in = new DataInputStream(cliente.getInputStream());
-        // DataOutputStream out = new DataOutputStream(cliente.getOutputStream());
-        // ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
-        // ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
-
-        //String mensaje = "";
-        //String key;
-        Cipher desCipher;
-        byte[] mensajeEnviadoCifrado;
-
-        try
-        {
-
-            //recogemos del flujo la clave simetrica
-            SecretKey key = (SecretKey) recibir_objeto.readObject();
-        //    System.out.println("le clave es : " + key);
-        //    System.out.println("Configurando Cipher para encriptar");
-            desCipher = Cipher.getInstance("DES");
-
-            desCipher.init(Cipher.DECRYPT_MODE, key);
-        //    System.out.print("Inserta \n");
-
-            mensajeEnviadoCifrado = desCipher.doFinal(cuenta.getBytes());
-
-            enviar_objeto.writeObject(mensajeEnviadoCifrado);
-
-
-        } catch (UnknownHostException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
 
     public static String Cifrado_simentrico_trans(Socket cliente, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException {
         String mensajeRecibidoDescifrado = "";
@@ -508,19 +444,17 @@ class Cliente {
             Cipher desCipher = null;
 
 
-        //    System.out.println("Obteniendo generador de claves con cifrado DES");
+
             try {
                 keygen = KeyGenerator.getInstance("DES");
             } catch (NoSuchAlgorithmException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-        //    System.out.println("Generando clave");
+
             SecretKey key = keygen.generateKey();
 
-         //   System.out.println("La clave es: " + key);
 
-         //   System.out.println("Obteniendo objeto Cipher con cifraddo DES");
             try {
                 desCipher = Cipher.getInstance("DES");
             } catch (NoSuchAlgorithmException e) {
@@ -530,7 +464,6 @@ class Cliente {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-           // System.out.println("Configurando Cipher para desencriptar");
             try {
                 desCipher.init(Cipher.DECRYPT_MODE, key);
             } catch (InvalidKeyException e) {
@@ -545,14 +478,7 @@ class Cliente {
             mensajeRecibido = (byte[]) recibir_objeto.readObject();
 
             mensajeRecibidoDescifrado = new String(desCipher.doFinal(mensajeRecibido));
-         //   System.out.println("El texto enviado por el cliente y descifrado por el servidor es : " + new String(mensajeRecibidoDescifrado));
 
-
-
-            // cierra los paquetes de datos, el socket y el servidor
-
-
-            //System.out.println("Fin de la conexion");
 
 
 

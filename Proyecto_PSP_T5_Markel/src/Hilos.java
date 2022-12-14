@@ -106,67 +106,79 @@ public class Hilos implements Runnable{
     }
 
     public void Comprobar_inicio_sesion(ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
-        ObjectInputStream mostrar = new ObjectInputStream(new FileInputStream("Usuarios.dat"));
-
-        int es = 0;
-        System.out.println("Ha entrado en Inicio de sesión");
         Usuarios usuario = (Usuarios) recibir_objeto.readObject();
-        Usuarios usuarios = (Usuarios) mostrar.readObject();
+        File f = new File("Usuarios.dat");
+        if(!f.isFile()) {
+            enviar_dato.writeUTF("f");
+            System.out.println("Error. No hay usuarios");
+            logger.log(Level.WARNING,"\tNo hay usuarios");
+            servidor(enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
+        } else {
 
-        try {
-            while (usuarios != null){
-                if (Objects.equals(usuarios.usuario, usuario.usuario) && Objects.equals(usuarios.contrasena, usuario.contrasena)) {
-                    enviar_dato.writeUTF("s");
-                    System.out.println("Concuerda");
-                    String ds = recibir_dato.readUTF();
-                    if (ds.equals("s")){
-                        String contrato = "Normas del banco.";
+            ObjectInputStream mostrar = new ObjectInputStream(new FileInputStream(f));
 
-                        enviar_dato.writeUTF(contrato);
+            int es = 0;
+            System.out.println("Ha entrado en Inicio de sesión");
+            Usuarios usuarios = (Usuarios) mostrar.readObject();
 
-                        String respuesta = recibir_dato.readUTF();
+            try {
+                while (usuarios != null) {
+                    if (Objects.equals(usuarios.usuario, usuario.usuario) && Objects.equals(usuarios.contrasena, usuario.contrasena)) {
+                        enviar_dato.writeUTF("s");
+                        es += 1;
+                        System.out.println("Concuerda");
+                        String ds = recibir_dato.readUTF();
+                        if (ds.equals("s")) {
+                            String contrato = "Normas del banco.";
 
-                        if (respuesta.equals("s")) {
-                            Firmado_digital(usuario, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
+                            enviar_dato.writeUTF(contrato);
+
+                            String respuesta = recibir_dato.readUTF();
+
+                            if (respuesta.equals("s")) {
+                                Firmado_digital(usuario, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
+                            } else {
+                                System.out.println("Vuelves al menú");
+                                //  enviar_dato.writeUTF("n");
+                                logger.log(Level.WARNING, "\tEl usuario ha rechazado el contrato. Nombre: " + usuario.nombre + "  Usuario: " + usuario.usuario);
+                                mostrar.close();
+                                servidor(enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
+                            }
+                            es++;
+                            break;
                         } else {
                             System.out.println("Vuelves al menú");
-                          //  enviar_dato.writeUTF("n");
-                            logger.log(Level.WARNING,"\tEl usuario ha rechazado el contrato. Nombre: " + usuario.nombre + "  Usuario: " + usuario.usuario);
+                            // enviar_dato.writeUTF("n");
+                            logger.log(Level.WARNING, "\tEl usuario ha rechazado el contrato. Nombre: " + usuario.nombre + "  Usuario: " + usuario.usuario);
                             mostrar.close();
                             servidor(enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
-                        }
-                        es++;
-                        break;
-                    } else {
-                        System.out.println("Vuelves al menú");
-                       // enviar_dato.writeUTF("n");
-                        logger.log(Level.WARNING,"\tEl usuario ha rechazado el contrato. Nombre: " + usuario.nombre + "  Usuario: " + usuario.usuario);
-                        mostrar.close();
-                        servidor(enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
 
+                        }
+                    } else {
+                        usuarios = (Usuarios) mostrar.readObject();
                     }
-                } else {
+
+                }
+                if (es == 0) {
                     System.out.println("El usuario y/o contraseña no existe. Vuelves al menú");
                     enviar_dato.writeUTF("n");
-                    logger.log(Level.WARNING,"\tEl usuario insertado no existe. Nombre: " + usuario.nombre + "  Usuario: " + usuario.usuario);
+                    logger.log(Level.WARNING, "\tEl usuario insertado no existe. Nombre: " + usuario.nombre + "  Usuario: " + usuario.usuario);
                     mostrar.close();
                     servidor(enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
                 }
-                usuarios = (Usuarios) mostrar.readObject();
+            } catch (IOException e) {
+                e.printStackTrace();
+                //System.out.println("Ha ocurrido un error");
+                logger.log(Level.WARNING, "\tError al iniciar error. Usuario: " + usuario.usuario);
+            } catch (ClassNotFoundException e) {
+                System.out.println("Ha habido algun error con la clase");
+                logger.log(Level.WARNING, "\tError al iniciar error. Usuario: " + usuario.usuario);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            //System.out.println("Ha ocurrido un error");
-            logger.log(Level.WARNING,"\tError al iniciar error. Usuario: " + usuario.usuario);
-        } catch (ClassNotFoundException e) {
-            System.out.println("Ha habido algun error con la clase");
-            logger.log(Level.WARNING,"\tError al iniciar error. Usuario: " + usuario.usuario);
+
+            //enviar_dato.writeUTF("d");
+            mostrar.close();
+            servidor(enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
         }
-
-        enviar_dato.writeUTF("d");
-        mostrar.close();
-        servidor(enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
-
 
     }
 
@@ -185,20 +197,17 @@ public class Hilos implements Runnable{
 
         try {
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
-//SE CREA EL PAR DE CLAVES PRIVADA Y PÚBLICA
+
             KeyPair par = keyGen.generateKeyPair();
             PrivateKey clavepriv = par.getPrivate();
             PublicKey clavepub = par.getPublic();
-//FIRMA CON CLAVE PRIVADA EL MENSAJE
-//AL OBJETO Signature SE LE SUMINISTRAN LOS DATOS A FIRMAR
+
             Signature dsa = Signature.getInstance("SHA256withDSA");
             dsa.initSign(clavepriv);
             String mensaje = "Contrato aceptado";
             dsa.update(mensaje.getBytes());
-            byte[] firma = dsa.sign(); //MENSAJE FIRMADO
-//EL RECEPTOR DEL MENSAJE
-//VERIFICA CON LA CLAVE PUIBLICA EL MENSAJE FIRMADO
-//AL OBJETO signature sE LE suministralos datos a verificar
+            byte[] firma = dsa.sign();
+
             Signature verificadsa = Signature.getInstance("SHA256withDSA");
             verificadsa.initVerify(clavepub);
             verificadsa.update(mensaje.getBytes());
@@ -470,14 +479,11 @@ public class Hilos implements Runnable{
             }
             System.out.println("Generando clave");
             SecretKey key = keygen.generateKey();
-            // //////////////////////////////////////////////////////////////
-            // CONVERTIR CLAVE A STRING Y VISUALIZAR/////////////////////////
-            // obteniendo la version codificada en base 64 de la clave
+
 
             System.out.println("La clave es: " + key);
 
-            // //////////////////////////////////////////////////////////////
-            // CREAR CIFRADOR Y PONER EN MODO DESCIFRADO//////////////////
+
             System.out.println("Obteniendo objeto Cipher con cifraddo DES");
             try {
                 desCipher = Cipher.getInstance("DES");
@@ -507,12 +513,6 @@ public class Hilos implements Runnable{
             System.out.println("El texto enviado por el cliente y descifrado por el servidor es : " + new String(mensajeRecibidoDescifrado));
 
 
-
-            // cierra los paquetes de datos, el socket y el servidor
-            //ois.close();
-            //oos.close();
-
-           // System.out.println("Fin de la conexion");
 
 
 
