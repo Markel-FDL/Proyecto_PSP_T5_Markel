@@ -27,6 +27,12 @@ public class Cuentas_bancarias implements Serializable {
         System.out.println("Usuario: " + usuario.usuario + " \nCuenta bancaria: " + cuenta_bancaria + "\nDinero: " + dinero+ "\n");
     }
 
+    /**
+     * Guarda la cuenta recibida desde el servidor en el fichero de cuentas. Si el fichero no existe lo crea.
+     * @param cuenta
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public void escribir_cuentas_bancarias(Cuentas_bancarias cuenta) throws IOException, ClassNotFoundException {
 
 
@@ -68,6 +74,12 @@ public class Cuentas_bancarias implements Serializable {
         escribir.close();
     }
 
+    /**
+     * Modifica el fichero de cuentas con las cuentas pasadas por el servidor. Se usa para ejecutar la transferencia (sumas y restas de dinero).
+     * @param cuenta
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public void Modificar_cuentas_bancarias(Cuentas_bancarias cuenta) throws IOException, ClassNotFoundException {
 
         cuentas_bancarias.clear();
@@ -113,6 +125,14 @@ public class Cuentas_bancarias implements Serializable {
         escribir.close();
     }
 
+    /**
+     * Comprueba si la cuenta pasada por el cliente existe en el fichero cuentas.
+     * @param cuenta_bancaria
+     * @return
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws NoSuchAlgorithmException
+     */
     public Cuentas_bancarias Comprobar_cuenta(String cuenta_bancaria) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
         //  DataOutputStream outData = new DataOutputStream(s.getOutputStream());
         //  DataInputStream inData = new DataInputStream(s.getInputStream());

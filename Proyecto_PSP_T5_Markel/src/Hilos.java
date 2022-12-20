@@ -58,6 +58,16 @@ public class Hilos implements Runnable{
 
     }
 
+    /**
+     * Función que recibe y comprueba si va a iniciar sesión o registrar un nuevo usuario
+     * @param enviar_objeto
+     * @param recibir_objeto
+     * @param enviar_dato
+     * @param recibir_dato
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws NoSuchAlgorithmException
+     */
     public void servidor(ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
 
         System.out.println("Dato");
@@ -75,6 +85,16 @@ public class Hilos implements Runnable{
 
     }
 
+    /**
+     * Registra a un nuevo usuario
+     * @param enviar_objeto
+     * @param recibir_objeto
+     * @param enviar_dato
+     * @param recibir_dato
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws NoSuchAlgorithmException
+     */
     public void Registro_servidor(ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
 
         Usuarios usuario = null;
@@ -105,6 +125,16 @@ public class Hilos implements Runnable{
 
     }
 
+    /**
+     * Comprueba que los datos recibidos existen en el fichero .dat de los usuarios. En caso de que el usuario exista, pregunta si quiere leer el contrato, y después si quiere aceptarlo en caso de aceptar.
+     * @param enviar_objeto
+     * @param recibir_objeto
+     * @param enviar_dato
+     * @param recibir_dato
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws NoSuchAlgorithmException
+     */
     public void Comprobar_inicio_sesion(ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
         Usuarios usuario = (Usuarios) recibir_objeto.readObject();
         File f = new File("Usuarios.dat");
@@ -193,6 +223,15 @@ public class Hilos implements Runnable{
 
     }
 
+    /**
+     * Firma el documento y devuelve si se ha firmado correctamente o no.
+     * @param usuarios
+     * @param enviar_objeto
+     * @param recibir_objeto
+     * @param enviar_dato
+     * @param recibir_dato
+     * @throws IOException
+     */
     public void Firmado_digital(Usuarios usuarios, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException {
 
         try {
@@ -237,6 +276,17 @@ public class Hilos implements Runnable{
 
     }
 
+    /**
+     * Recibe el dato del usuario para dirigirte o a ver el saldo de una cuenta o hacer una transferencia.
+     * @param usuarios
+     * @param enviar_objeto
+     * @param recibir_objeto
+     * @param enviar_dato
+     * @param recibir_dato
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     * @throws ClassNotFoundException
+     */
     public void Banca_online(Usuarios usuarios, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException, NoSuchAlgorithmException, ClassNotFoundException {
 
         System.out.println("Banca online dentro");
@@ -274,6 +324,18 @@ public class Hilos implements Runnable{
 
     }*/
 
+    /**
+     * Busca en el fichero cuentas para mostrar el número de cuenta del usuario logeado y te va dependiendo si es para mostrar el saldo o hacer una transferencia.
+     * @param usuarios
+     * @param i
+     * @param enviar_objeto
+     * @param recibir_objeto
+     * @param enviar_dato
+     * @param recibir_dato
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws NoSuchAlgorithmException
+     */
     public void Mostrar_cuenta_usuario(Usuarios usuarios, int i, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
         //  DataOutputStream outData = new DataOutputStream(s.getOutputStream());
         //  DataInputStream inData = new DataInputStream(s.getInputStream());
@@ -309,6 +371,18 @@ public class Hilos implements Runnable{
 
     }
 
+    /**
+     * Recibe tanto el dinero y la cuenta desde el cliente, llama a la función de doble certificado. Recibe o 1 o 2 desde el cliente para saber si el número de cuenta recibida por el cliente existe o no.
+     * Si existe, resta el dinero de la cuenta del usuario y añade al seleccionado por el usuario. En caso de que no exista, tan solo resta el dinero a la cuenta del usuario.
+     * @param usuario
+     * @param enviar_objeto
+     * @param recibir_objeto
+     * @param enviar_dato
+     * @param recibir_dato
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     * @throws ClassNotFoundException
+     */
     public void Transferir_dinero(Usuarios usuario, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException, NoSuchAlgorithmException, ClassNotFoundException {
         // DataOutputStream outData = new DataOutputStream(s.getOutputStream());
         // DataInputStream inData = new DataInputStream(s.getInputStream());
@@ -362,6 +436,14 @@ public class Hilos implements Runnable{
 
     }
 
+    /**
+     * Recibe la llave del usuario para encriptar el número aleatorio y enviarlo al cliente.
+     * @param enviar_objeto
+     * @param recibir_objeto
+     * @param enviar_dato
+     * @param recibir_dato
+     * @throws IOException
+     */
     public void doble_certificado(ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException {
         // DataInputStream inData = new DataInputStream(s.getInputStream());
         // DataOutputStream enviar_dato = new DataOutputStream(s.getOutputStream());
@@ -416,7 +498,17 @@ public class Hilos implements Runnable{
 
     }
 
-
+    /**
+     * Envia al usuario el saldo de la cuenta seleccionada
+     * @param usuarios
+     * @param enviar_objeto
+     * @param recibir_objeto
+     * @param enviar_dato
+     * @param recibir_dato
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws NoSuchAlgorithmException
+     */
     public void Cuenta_Mostrar(Usuarios usuarios, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
         // DataInputStream inData = new DataInputStream(s.getInputStream());
         // DataOutputStream outData = new DataOutputStream(s.getOutputStream());

@@ -37,6 +37,21 @@ class Cliente {
         Seleccion(cliente, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
     }
 
+    /**
+     * Menú de inicio de sesión/Registro. Dependiendo de la opción, envías al servidor un número señalando que quiere hacer el usuario.
+     * @param cliente
+     * @param enviar_objeto
+     * @param recibir_objeto
+     * @param enviar_dato
+     * @param recibir_dato
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     * @throws NoSuchPaddingException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     * @throws InvalidKeyException
+     * @throws ClassNotFoundException
+     */
     public static void Seleccion(Socket cliente, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
         int num = 0;
 
@@ -72,6 +87,21 @@ class Cliente {
 
     }
 
+    /**
+     * Recibe los valores para registrar a un usuario. Envía al servidor los datos en objeto para guardarlo.
+     * @param cliente
+     * @param enviar_objeto
+     * @param recibir_objeto
+     * @param enviar_dato
+     * @param recibir_dato
+     * @throws NoSuchAlgorithmException
+     * @throws IOException
+     * @throws NoSuchPaddingException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     * @throws InvalidKeyException
+     * @throws ClassNotFoundException
+     */
     public static void Registrarse(Socket cliente, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws NoSuchAlgorithmException, IOException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
         String nombre;
         String apellido = null;
@@ -187,6 +217,21 @@ class Cliente {
 
     }
 
+    /**
+     * El usuario inserta los datos y envía los valores en objetos al servidor para comprobar el inicio de sesión.
+     * @param cliente
+     * @param enviar_objeto
+     * @param recibir_objeto
+     * @param enviar_dato
+     * @param recibir_dato
+     * @throws NoSuchAlgorithmException
+     * @throws IOException
+     * @throws NoSuchPaddingException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     * @throws InvalidKeyException
+     * @throws ClassNotFoundException
+     */
     public static void Iniciar_sesion(Socket cliente, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws NoSuchAlgorithmException, IOException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
         String usuarioo = null;
         String contrasena;
@@ -276,6 +321,21 @@ class Cliente {
 
     }
 
+    /**
+     * Menú del banco. Dependiendo de la opción, envías al servidor un número señalando que quiere hacer el usuario.
+     * @param cliente
+     * @param enviar_objeto
+     * @param recibir_objeto
+     * @param enviar_dato
+     * @param recibir_dato
+     * @throws IOException
+     * @throws NoSuchPaddingException
+     * @throws IllegalBlockSizeException
+     * @throws NoSuchAlgorithmException
+     * @throws BadPaddingException
+     * @throws InvalidKeyException
+     * @throws ClassNotFoundException
+     */
     public static void Menu_banca(Socket cliente, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
 
         int opcion = 0;
@@ -310,20 +370,39 @@ class Cliente {
 
     }
 
+    /**
+     * Recibo la cuenta del usuario y el cliente introduce el número mostrado o cualquier otro para ver el saldo.
+     * @param cliente
+     * @param enviar_objeto
+     * @param recibir_objeto
+     * @param enviar_dato
+     * @param recibir_dato
+     * @throws IOException
+     * @throws NoSuchPaddingException
+     * @throws IllegalBlockSizeException
+     * @throws NoSuchAlgorithmException
+     * @throws BadPaddingException
+     * @throws InvalidKeyException
+     * @throws ClassNotFoundException
+     */
     public static void Ver_saldo(Socket cliente, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
-        // ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
-        // ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
-        // DataOutputStream enviar_dato = new DataOutputStream(cliente.getOutputStream());
-        // DataInputStream recibir_dato = new DataInputStream(cliente.getInputStream());
 
-        String sec_cuenta;
+        String sec_cuenta = null;
 
         String zz = recibir_dato.readUTF();
 
         System.out.println(zz);
+        
+        boolean s = false;
+        do
+            try {
+                System.out.println("Inserta el numero de la cuenta: ");
+                sec_cuenta = scanner.nextLine();
+            } catch (Exception e) {
+                s = true;
+                System.out.println("Error al insertar dato");
+            }while (s);
 
-        System.out.println("Inserta el numero de la cuenta: ");
-        sec_cuenta = scanner.nextLine();
 
         Cifrado_simetrico(cliente, sec_cuenta, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
 
@@ -339,6 +418,22 @@ class Cliente {
         Menu_banca(cliente, enviar_objeto, recibir_objeto, enviar_dato, recibir_dato);
     }
 
+    /**
+     * Recibe la llave del servidor y envía el mensaje cifrado al servidor.
+     * @param cliente
+     * @param cuenta
+     * @param enviar_objeto
+     * @param recibir_objeto
+     * @param enviar_dato
+     * @param recibir_dato
+     * @throws NoSuchAlgorithmException
+     * @throws NoSuchPaddingException
+     * @throws InvalidKeyException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     */
     public static void Cifrado_simetrico(Socket cliente, String cuenta, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, ClassNotFoundException, IOException {
         // DataInputStream in = new DataInputStream(cliente.getInputStream());
         // DataOutputStream out = new DataOutputStream(cliente.getOutputStream());
@@ -374,6 +469,21 @@ class Cliente {
         }
     }
 
+    /**
+     * Recibe la cuenta del usuario de donde saldrá el dinero y entrar en el seleccionado.Si existe, resta a la cuenta del cliente y suma al otro. Si no existe, resta al usuario.
+     * @param cliente
+     * @param enviar_objeto
+     * @param recibir_objeto
+     * @param enviar_dato
+     * @param recibir_dato
+     * @throws IOException
+     * @throws NoSuchPaddingException
+     * @throws IllegalBlockSizeException
+     * @throws NoSuchAlgorithmException
+     * @throws BadPaddingException
+     * @throws InvalidKeyException
+     * @throws ClassNotFoundException
+     */
     public static void Transferencia_dinero(Socket cliente, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
         // ObjectOutputStream enviar_objeto = new ObjectOutputStream(cliente.getOutputStream());
         // ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());
@@ -432,6 +542,16 @@ class Cliente {
 
     }
 
+    /**
+     * Realiza el cifrado simétrico.
+     * @param cliente
+     * @param enviar_objeto
+     * @param recibir_objeto
+     * @param enviar_dato
+     * @param recibir_dato
+     * @return
+     * @throws IOException
+     */
     public static String Cifrado_simentrico_trans(Socket cliente, ObjectOutputStream enviar_objeto, ObjectInputStream recibir_objeto, DataOutputStream enviar_dato, DataInputStream recibir_dato) throws IOException {
         String mensajeRecibidoDescifrado = "";
         // ObjectInputStream recibir_objeto = new ObjectInputStream(cliente.getInputStream());

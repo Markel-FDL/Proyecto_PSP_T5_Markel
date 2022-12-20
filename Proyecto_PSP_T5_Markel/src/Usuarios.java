@@ -34,6 +34,12 @@ public class Usuarios implements Serializable{
             System.out.println("Nombre: " + nombre + " \nApellido: " + apellido + "\nEdad: " + edad + "\nEmail: " + email + "\nUsuario: " + usuario + "\ncontrasena: " + contrasena + "\n");
         }
 
+    /**
+     * Guarda el usuario recibido desde el servidor en el fichero de usuarios. Si el fichero no existe lo crea.
+     * @param usuario
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
        public void escribir_usuario(Usuarios usuario) throws IOException, ClassNotFoundException {
             List<Usuarios> usuarios = new ArrayList<Usuarios>();
 
